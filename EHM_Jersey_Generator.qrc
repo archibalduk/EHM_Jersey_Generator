@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="default_background.png">images/default_background.png</file>
+        <file alias="default_foreground.png">images/default_foreground.png</file>
+        <file alias="default_trim.png">images/default_trim.png</file>
+    </qresource>
+    <qresource prefix="/fonts">
+        <file alias="sports_jersey.ttf">fonts/sportsjersey.ttf</file>
+    </qresource>
+</RCC>
