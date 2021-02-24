@@ -3,6 +3,7 @@
 
 // Application headers
 class PreviewWidget;
+class SettingsWidget;
 
 // Qt headers
 #include <QMainWindow>
@@ -17,5 +18,6 @@ public:
 
 private:
     PreviewWidget *preview_widget_;
+    SettingsWidget *settings_widget_;
 };
 #endif // MAIN_WINDOW_H

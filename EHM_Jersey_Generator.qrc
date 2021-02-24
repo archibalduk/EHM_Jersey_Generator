@@ -5,6 +5,10 @@
         <file alias="default_trim.png">images/default_trim.png</file>
     </qresource>
     <qresource prefix="/fonts">
-        <file alias="sports_jersey.ttf">fonts/sportsjersey.ttf</file>
+        <file alias="face_off_m54.ttf">fonts/face_off_m54.ttf</file>
+        <file alias="jersey_m54.ttf">fonts/jersey_m54.ttf</file>
+        <file alias="new_athletic_m54.ttf">fonts/new_athletic_m54.ttf</file>
+        <file alias="sports_jersey.ttf">fonts/sports_jersey.ttf</file>
+        <file alias="sports_world.ttf">fonts/sports_world_reg.ttf</file>
     </qresource>
 </RCC>

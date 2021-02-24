@@ -1,14 +1,15 @@
 #include "jersey.h"
 
 // Application headers
-#include "dimensions.h"
+#include "../dimensions.h"
+#include "font_server.h"
 
 // Qt headers
 #include <QDebug>
-#include <QFontDatabase>
 #include <QImage>
 #include <QPainter>
 #include <QPen>
+#include <QSettings>
 
 // --- Static members --- //
 bool Jersey::use_uppercase_text_ = true;
@@ -36,23 +37,9 @@ Jersey::~Jersey()
 }
 
 // --- File i/o --- //
-bool Jersey::save(const QString &filename) const
+bool Jersey::save(const QString &file_name) const
 {
-    return image_->save(filename);
-}
-
-// --- Generate font --- //
-QFont Jersey::font() const
-{
-    const auto font_id{QFontDatabase::addApplicationFont(":/fonts/sports_jersey.ttf")};
-    const auto font_family{QFontDatabase::applicationFontFamilies(font_id).at(0)};
-
-    QFont font(font_family, Dimensions::JerseyNameFontSize, QFont::Thin);
-    font.setLetterSpacing(QFont::AbsoluteSpacing, Dimensions::FontLetterSpacing);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    font.setStretch(QFont::Unstretched);
-
-    return font;
+    return image_->save(file_name);
 }
 
 // --- Generate image --- //
@@ -70,7 +57,8 @@ void Jersey::generate()
     const QImage trim_layer{generateJerseyLayer(":/images/default_trim.png", trim_colour_)};
 
     // Font
-    auto font{this->font()};
+    FontServer font_server;
+    auto font{font_server.font()};
 
     // Paint/collate the jersey
     QPainter jersey_painter(image_);
@@ -82,10 +70,13 @@ void Jersey::generate()
     jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, foreground_layer);
     jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, trim_layer);
 
+    QSettings settings;
+
     // Paint the jersey name text
     auto name_layer{generateNameLayer()};
     jersey_painter.drawImage(0,
-                             Dimensions::JerseyNameVerticalPosition,
+                             Dimensions::JerseyNameVerticalPosition
+                                 + settings.value("name_text_vertical_offset", 0).toInt(),
                              name_layer.scaledToHeight(Dimensions::JerseyNameFontSize,
                                                        Qt::SmoothTransformation));
 
@@ -93,7 +84,8 @@ void Jersey::generate()
     font.setPointSize(Dimensions::JerseyNumberFontSize);
     jersey_painter.setFont(font);
     jersey_painter.drawText(0,
-                            Dimensions::JerseyNumberVerticalPosition,
+                            Dimensions::JerseyNumberVerticalPosition
+                                + settings.value("number_text_vertical_offset", 0).toInt(),
                             Dimensions::JerseyImageWidth,
                             Dimensions::JerseyNumberFontSize,
                             Qt::AlignCenter,
@@ -103,9 +95,9 @@ void Jersey::generate()
 }
 
 // --- Generate a layer of the jersey image --- //
-QImage Jersey::generateJerseyLayer(const QString &filename, QColor colour)
+QImage Jersey::generateJerseyLayer(const QString &file_name, QColor colour)
 {
-    QImage image(filename);
+    QImage image(file_name);
 
     const auto height{image.height()};
     const auto width{image.width()};
@@ -133,7 +125,8 @@ QImage Jersey::generateNameLayer() const
      */
 
     // Font
-    auto font{this->font()};
+    FontServer font_server;
+    auto font{font_server.font()};
     font.setPointSize(Dimensions::JerseyNameUpscaledFontSize);
 
     // Name text

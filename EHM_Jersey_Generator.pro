@@ -22,18 +22,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += warn_on
 
 SOURCES += \
-    jersey.cpp \
+    jersey/font_item.cpp \
+    jersey/font_server.cpp \
+    jersey/jersey.cpp \
     main.cpp \
     mainwindow.cpp \
     ui/colour_widget.cpp \
-    ui/preview_widget.cpp
+    ui/preview_widget.cpp \
+    ui/settings_widget.cpp
 
 HEADERS += \
     dimensions.h \
-    jersey.h \
+    jersey/font_item.h \
+    jersey/font_server.h \
+    jersey/jersey.h \
     mainwindow.h \
     ui/colour_widget.h \
-    ui/preview_widget.h
+    ui/preview_widget.h \
+    ui/settings_widget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

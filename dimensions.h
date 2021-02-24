@@ -28,9 +28,14 @@ enum ENUM_USER_INTERFACE_DIMENSIONS {
     // Preview label
     PreviewWidth = 200,
     PreviewHeight = JerseyImageHeight,
+    // Widget panel
+    WidgetPanelCount = 2,
+    WidgetPanelWidth = 200,
     // Application window
-    WindowWidth = PreviewWidth * 2,
-    WindowHeigth = PreviewHeight
+    WindowPadding = 10,
+    WindowWidth = PreviewWidth + (WidgetPanelWidth * WidgetPanelCount)
+                  + (WidgetPanelCount * WindowPadding),
+    WindowHeight = (WindowWidth / 16) * 9
 };
 } // namespace Dimensions
 

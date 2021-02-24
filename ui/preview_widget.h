@@ -3,7 +3,7 @@
 
 // Application headers
 class ColourWidget;
-#include "../jersey.h"
+#include "../jersey/jersey.h"
 
 // Qt headers
 class QLabel;

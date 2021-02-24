@@ -3,6 +3,7 @@
 // Application headers
 #include "dimensions.h"
 #include "ui/preview_widget.h"
+#include "ui/settings_widget.h"
 
 // Qt headers
 #include <QCoreApplication>
@@ -15,17 +16,19 @@ MainWindow::MainWindow(QWidget *parent)
     // Window
     setWindowTitle(QString("%1 v%2").arg(QCoreApplication::applicationName(),
                                          QCoreApplication::applicationVersion()));
-    setMinimumSize(640, 480);
+    setMinimumSize(Dimensions::WindowWidth, Dimensions::WindowHeight);
 
     // Central widget
     auto central_widget{new QWidget(this)};
     setCentralWidget(central_widget);
 
-    // Widget
+    // Widgets
     preview_widget_ = new PreviewWidget(this);
+    settings_widget_ = new SettingsWidget(this);
 
     // Layout
     auto layout{new QHBoxLayout(central_widget)};
+    layout->addWidget(settings_widget_);
     layout->addWidget(preview_widget_);
 }
 

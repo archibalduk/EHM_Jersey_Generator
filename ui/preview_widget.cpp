@@ -17,6 +17,8 @@
 // --- Constructor --- //
 PreviewWidget::PreviewWidget(QWidget *parent) : QWidget(parent)
 {
+    setMinimumWidth(Dimensions::WidgetPanelWidth + Dimensions::PreviewWidth);
+
     // Preview widget
     jersey_image_preview_ = new QLabel(this);
     jersey_image_preview_->setFixedSize(Dimensions::JerseyImageWidth, Dimensions::JerseyImageHeight);
@@ -60,8 +62,8 @@ QWidget *PreviewWidget::createSettingsWidget()
     layout->addRow(tr("Background RGB:"), colour_selector_background_);
     layout->addRow(tr("Foreground RGB:"), colour_selector_foreground_);
     layout->addRow(tr("Trim RGB:"), colour_selector_trim_);
-    layout->addWidget(preview_button);
-    layout->addWidget(save_button);
+    layout->addRow(preview_button);
+    layout->addRow(save_button);
 
     return widget;
 }
@@ -87,17 +89,17 @@ void PreviewWidget::onPreview()
 
 void PreviewWidget::onSave()
 {
-    const auto filename{QFileDialog::getSaveFileName(this,
-                                                     tr("Save Jersey Image"),
-                                                     QString("%1/ehm_%2_%3.png")
-                                                         .arg(QDir::homePath(),
-                                                              jersey_name_input_->text(),
-                                                              jersey_number_input_->text()),
-                                                     tr("Images (*.png)"))};
+    const auto file_name{QFileDialog::getSaveFileName(this,
+                                                      tr("Save Jersey Image"),
+                                                      QString("%1/ehm_%2_%3.png")
+                                                          .arg(QDir::homePath(),
+                                                               jersey_name_input_->text(),
+                                                               jersey_number_input_->text()),
+                                                      tr("Images (*.png)"))};
 
-    if (filename.isEmpty())
+    if (file_name.isEmpty())
         return;
 
     const auto jersey{generateJersey()};
-    jersey.save(filename);
+    jersey.save(file_name);
 }

@@ -18,7 +18,7 @@ public:
     ~Jersey();
 
     // File I/O
-    bool save(const QString &filename) const;
+    bool save(const QString &file_name) const;
 
     // Image generation
     void generate();
@@ -55,11 +55,8 @@ private:
     QColor foreground_colour_;
     QColor trim_colour_;
 
-    // Font
-    QFont font() const;
-
     // Image generation
-    QImage generateJerseyLayer(const QString &filename, QColor colour);
+    QImage generateJerseyLayer(const QString &file_name, QColor colour);
     QImage generateNameLayer() const;
 
     // Output image
