@@ -6,6 +6,7 @@
 #include "../jersey/font_server.h"
 
 // Qt headers
+class QCheckBox;
 class QComboBox;
 class QGroupBox;
 class QSpinBox;
@@ -19,28 +20,36 @@ public:
 
 private:
     // Font
-    QGroupBox *createFontGroup();
+    QGroupBox *createGeneralSettingsGroup();
     QComboBox *font_selector_;
     FontServer font_server_;
 
-    // Text position
-    QGroupBox *createTextPositionGroup();
-    QSpinBox *name_text_vertical_position_offset_;
-    QSpinBox *number_text_vertical_position_offset_;
+    // Text settings
+    QGroupBox *createTextSettingsGroup(const QString &settings_group_title,
+                                       const QString &registry_settings_name_prefix);
+
+    // Widgets
+    QCheckBox *createCheckBox(const QString &registry_settings_name,
+                              QWidget *parent,
+                              const bool default_value = false);
+    QSpinBox *createSpinBox(const QString &registry_settings_name,
+                            QWidget *parent,
+                            const qint32 minimum_value,
+                            const qint32 maximum_value);
 
     enum ENUM_RANGES {
-        VERTICAL_POSITION_ADJUST
-        = 50, // Reduce the full range as lesser values will still allow text to go off-screen
-        MINIMUM_VERTICAL_POSITION_OFFSET = 0
-                                           - (Dimensions::JerseyImageHeight
-                                              - VERTICAL_POSITION_ADJUST),
-        MAXIMUM_VERTICAL_POSITION_OFFSET = Dimensions::JerseyImageHeight - VERTICAL_POSITION_ADJUST
+        MINIMUM_HORIZONTAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageWidth,
+        MAXIMUM_HORIZONTAL_POSITION_OFFSET = Dimensions::JerseyImageWidth,
+        MINIMUM_VERTICAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageHeight,
+        MAXIMUM_VERTICAL_POSITION_OFFSET = Dimensions::JerseyImageHeight,
+        MINIMUM_TEXT_SIZE_OFFSET = -100,
+        MAXIMUM_TEXT_SIZE_OFFSET = 100
     };
 
 private slots:
-    // Text position
-    void setNameTextVerticalPositionOffset(const qint32 i);
-    void setNumberTextVerticalPositionOffset(const qint32 i);
+    // Set setting
+    void setBoolSetting(const bool b);
+    void setIntegerSetting(const qint32 i);
 };
 
 #endif // SETTINGS_WIDGET_H

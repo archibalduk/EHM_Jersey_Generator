@@ -41,12 +41,6 @@ public:
     inline void setJerseyNumber(const qint16 jersey_number) { jersey_number_ = jersey_number; }
     inline void setSurname(const QString &surname) { surname_ = surname; }
 
-    // Settings
-    inline void useUppercaseText(bool use_uppercase_text)
-    {
-        use_uppercase_text_ = use_uppercase_text;
-    }
-
     enum ENUM_FLAGS { MINIMUM_JERSEY_NUMBER = 1, MAXIMUM_JERSEY_NUMBER = 99 };
 
 private:
@@ -68,9 +62,6 @@ private:
     // Player details
     qint16 jersey_number_;
     QString surname_;
-
-    // Settings
-    static bool use_uppercase_text_;
 };
 
 #endif // JERSEY_H

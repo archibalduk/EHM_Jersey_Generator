@@ -4,6 +4,7 @@
 #include "../dimensions.h"
 
 // Qt headers
+#include <QCheckBox>
 #include <QComboBox>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -19,83 +20,102 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 
     // Layout and groups
     auto layout{new QVBoxLayout(this)};
-    layout->addWidget(createFontGroup());
-    layout->addWidget(createTextPositionGroup());
+    layout->addWidget(createGeneralSettingsGroup());
+    layout->addWidget(createTextSettingsGroup(tr("Player Name"), "name"));
+    layout->addWidget(createTextSettingsGroup(tr("Jersey Number"), "number"));
 }
 
-// --- Create ton settings --- //
-QGroupBox *SettingsWidget::createFontGroup()
+// --- Create general settings --- //
+QGroupBox *SettingsWidget::createGeneralSettingsGroup()
 {
-    auto group{new QGroupBox(tr("Font"), this)};
+    auto group{new QGroupBox(tr("Jersey Settings"), this)};
 
     font_selector_ = new QComboBox(group);
     font_server_.setComboBox(font_selector_);
 
-    auto label{
-        new QLabel(tr("Select the jersey text font. Any font marked as 'no accents' will "
-                      "do not support accents and will automatically remove accents from any "
-                      "characters."),
-                   group)};
-    label->setWordWrap(true);
+    auto two_tone_layer{createCheckBox("two_tone_layer", group)};
+    auto upper_case_name_text{createCheckBox("upper_case_name_text", group, true)};
 
     auto layout{new QFormLayout(group)};
     layout->addRow(tr("Font:"), font_selector_);
-    layout->addRow(label);
+    layout->addRow(tr("Use two tone effect:"), two_tone_layer);
+    layout->addRow(tr("Use upper case text:"), upper_case_name_text);
 
     return group;
 }
 
-// --- Create the text position settings --- //
-QGroupBox *SettingsWidget::createTextPositionGroup()
+// --- Create the text settings --- //
+QGroupBox *SettingsWidget::createTextSettingsGroup(const QString &settings_group_title,
+                                                   const QString &registry_settings_name_prefix)
 {
-    auto group{new QGroupBox(tr("Text positioning"), this)};
+    auto group{new QGroupBox(QString("%1 Settings").arg(settings_group_title), this)};
 
-    QSettings settings;
+    auto horizontal_position_offset_{
+        createSpinBox(QString("%1_text_horizontal_offset").arg(registry_settings_name_prefix),
+                      group,
+                      MINIMUM_HORIZONTAL_POSITION_OFFSET,
+                      MAXIMUM_HORIZONTAL_POSITION_OFFSET)};
 
-    name_text_vertical_position_offset_ = new QSpinBox(group);
-    name_text_vertical_position_offset_->setRange(MINIMUM_VERTICAL_POSITION_OFFSET,
-                                                  MAXIMUM_VERTICAL_POSITION_OFFSET);
-    name_text_vertical_position_offset_->setValue(
-        settings.value("name_text_vertical_offset", 0).toInt());
-    QObject::connect(name_text_vertical_position_offset_,
-                     &QSpinBox::valueChanged,
-                     this,
-                     &SettingsWidget::setNameTextVerticalPositionOffset);
+    auto vertical_position_offset_{
+        createSpinBox(QString("%1_text_vertical_offset").arg(registry_settings_name_prefix),
+                      group,
+                      MINIMUM_VERTICAL_POSITION_OFFSET,
+                      MAXIMUM_VERTICAL_POSITION_OFFSET)};
 
-    number_text_vertical_position_offset_ = new QSpinBox(group);
-    number_text_vertical_position_offset_->setRange(MINIMUM_VERTICAL_POSITION_OFFSET,
-                                                    MAXIMUM_VERTICAL_POSITION_OFFSET);
-    number_text_vertical_position_offset_->setValue(
-        settings.value("number_text_vertical_offset", 0).toInt());
-    QObject::connect(number_text_vertical_position_offset_,
-                     &QSpinBox::valueChanged,
-                     this,
-                     &SettingsWidget::setNumberTextVerticalPositionOffset);
-
-    auto label{new QLabel(tr("Adjust the vertical position (in pixels) of the jersey name and "
-                             "number. A negative number moves the text upward and a positive "
-                             "number moves the text downward."),
-                          group)};
-    label->setWordWrap(true);
+    auto text_size_offset_{
+        createSpinBox(QString("%1_text_size_offset").arg(registry_settings_name_prefix),
+                      group,
+                      MINIMUM_TEXT_SIZE_OFFSET,
+                      MAXIMUM_TEXT_SIZE_OFFSET)};
 
     auto layout{new QFormLayout(group)};
-    layout->addRow(tr("Name vertical offset:"), name_text_vertical_position_offset_);
-    layout->addRow(tr("Number vertical offset:"), number_text_vertical_position_offset_);
-    layout->addRow(label);
+    layout->addRow(tr("Adjust horizontal position:"), horizontal_position_offset_);
+    layout->addRow(tr("Adjust vertical position:"), vertical_position_offset_);
+    layout->addRow(tr("Adjust text size:"), text_size_offset_);
 
     return group;
 }
 
-// --- Set name text vertical position offset --- //
-void SettingsWidget::setNameTextVerticalPositionOffset(const qint32 i)
+// --- Create a checkbox --- //
+QCheckBox *SettingsWidget::createCheckBox(const QString &registry_settings_name,
+                                          QWidget *parent,
+                                          const bool default_value)
 {
+    auto check_box{new QCheckBox(parent)};
+    check_box->setObjectName(registry_settings_name);
     QSettings settings;
-    settings.setValue("name_text_vertical_offset", i);
+    check_box->setChecked(settings.value(check_box->objectName(), default_value).toBool());
+    QObject::connect(check_box, &QCheckBox::toggled, this, &SettingsWidget::setBoolSetting);
+
+    return check_box;
 }
 
-// --- Set number text vertical position offset --- //
-void SettingsWidget::setNumberTextVerticalPositionOffset(const qint32 i)
+// --- Create a spinbox --- //
+QSpinBox *SettingsWidget::createSpinBox(const QString &registry_settings_name,
+                                        QWidget *parent,
+                                        const qint32 minimum_value,
+                                        const qint32 maximum_value)
+{
+    auto spin_box{new QSpinBox(parent)};
+    spin_box->setObjectName(registry_settings_name);
+    spin_box->setRange(minimum_value, maximum_value);
+    QSettings settings;
+    spin_box->setValue(settings.value(spin_box->objectName(), 0).toInt());
+    QObject::connect(spin_box, &QSpinBox::valueChanged, this, &SettingsWidget::setIntegerSetting);
+
+    return spin_box;
+}
+
+// --- Set a setting (bool) --- //
+void SettingsWidget::setBoolSetting(const bool b)
 {
     QSettings settings;
-    settings.setValue("number_text_vertical_offset", i);
+    settings.setValue(QObject::sender()->objectName(), b);
+}
+
+// --- Set a setting (integer) --- //
+void SettingsWidget::setIntegerSetting(const qint32 i)
+{
+    QSettings settings;
+    settings.setValue(QObject::sender()->objectName(), i);
 }
