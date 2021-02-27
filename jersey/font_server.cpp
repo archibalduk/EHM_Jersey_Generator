@@ -85,11 +85,11 @@ std::vector<FontItem> &FontServer::fonts()
         fonts_.push_back(FontItem(":/fonts/sports_world.ttf", false));
 
         // Find any fonts in the 'fonts' sub-folder
-        QDir dir{"extra_fonts"};
+        QDir dir("extra_fonts");
         if (dir.exists()) {
-            const auto extra_fonts_list{dir.entryList(QStringList() << "*.ttf"
+            const auto extra_fonts_list(dir.entryList(QStringList() << "*.ttf"
                                                                     << "*.TTF",
-                                                      QDir::Files)};
+                                                      QDir::Files));
 
             for (const auto &itr : extra_fonts_list) // Assume that all fonts are accent-compatible
                 fonts_.push_back(FontItem(QString("%1/%2").arg(dir.absolutePath(), itr), true));

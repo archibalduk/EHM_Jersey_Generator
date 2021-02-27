@@ -3,6 +3,7 @@
         <file alias="default_background.png">images/default_background.png</file>
         <file alias="default_foreground.png">images/default_foreground.png</file>
         <file alias="default_trim.png">images/default_trim.png</file>
+        <file alias="default_preset_image.png">images/default_preset_image.png</file>
         <file alias="two_tone_effect.png">images/two_tone_effect.png</file>
     </qresource>
     <qresource prefix="/fonts">

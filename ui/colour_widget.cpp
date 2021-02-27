@@ -20,6 +20,7 @@ ColourWidget::ColourWidget(const QColor &initial_colour, QWidget *parent) : QWid
     spin_box_blue_->setValue(initial_colour.blue());
 
     auto layout{new QHBoxLayout(this)};
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(spin_box_red_);
     layout->addWidget(spin_box_green_);
     layout->addWidget(spin_box_blue_);

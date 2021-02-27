@@ -14,9 +14,9 @@ enum ENUM_JERSEY_DIMENSIONS {
     PenThickness = 1,
     // Text
     JerseyNameFontSize = 18,
-    JerseyNameVerticalPosition = 40,
+    JerseyNameVerticalPosition = 47,
     JerseyNumberFontSize = 80,
-    JerseyNumberVerticalPosition = 70,
+    JerseyNumberVerticalPosition = 74,
     // Upscaled jersey name text
     JerseyNameUpscaleMultiplier = 5,
     JerseyNameUpscaledFontSize = JerseyNameFontSize * JerseyNameUpscaleMultiplier,

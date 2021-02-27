@@ -3,12 +3,14 @@
 // Application headers
 #include "../dimensions.h"
 #include "font_server.h"
+#include "jersey_image_server.h"
 
 // Qt headers
 #include <QDebug>
 #include <QImage>
 #include <QPainter>
 #include <QPen>
+#include <QRegularExpression>
 #include <QSettings>
 
 // --- Constructor --- //
@@ -42,17 +44,6 @@ bool Jersey::save(const QString &file_name) const
 // --- Generate image --- //
 void Jersey::generate()
 {
-    // Background colour image
-    const QImage background_layer{
-        generateJerseyLayer(":/images/default_background.png", background_colour_)};
-
-    // Foreground colour image
-    const QImage foreground_layer{
-        generateJerseyLayer(":/images/default_foreground.png", foreground_colour_)};
-
-    // Trim colour image
-    const QImage trim_layer{generateJerseyLayer(":/images/default_trim.png", trim_colour_)};
-
     // Font
     FontServer font_server;
     auto font{font_server.font()};
@@ -62,22 +53,13 @@ void Jersey::generate()
     jersey_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     jersey_painter.setPen(pen());
 
-    // Paint the jersey background layer
-    jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, background_layer);
+    // Paint the layers or preset (as applicable)
+    if (use_preset_image_)
+        paintPresetImage(jersey_painter);
+    else
+        paintLayeredImage(jersey_painter);
 
     QSettings settings;
-
-    // Two tone layer
-    if (settings.value("two_tone_layer", false).toBool()) {
-        const QImage two_tone_layer{":/images/two_tone_effect.png"};
-        jersey_painter.setCompositionMode(QPainter::CompositionMode_Multiply);
-        jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, two_tone_layer);
-        jersey_painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    }
-
-    // Paint the jersey foreground and trim layers
-    jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, foreground_layer);
-    jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, trim_layer);
 
     // Paint the jersey name text
     auto name_layer{generateNameLayer()};
@@ -142,8 +124,11 @@ QImage Jersey::generateNameLayer() const
 
     // Name text
     QSettings settings;
-    const QString name_text{
-        (settings.value("upper_case_name_text", true).toBool()) ? surname_.toUpper() : surname_};
+    QString name_text{(settings.value("upper_case_name_text", true).toBool()) ? surname_.toUpper()
+                                                                              : surname_};
+
+    if (!settings.value("accented_characters", false).toBool()) // Strip accented characters
+        toSimpleString(name_text);
 
     // Name layer image
     QImage name_layer(Dimensions::JerseyNameUpscaledWidth,
@@ -174,6 +159,58 @@ QImage Jersey::generateNameLayer() const
     return name_layer;
 }
 
+// --- Paint/generate the jersey using layer images --- //
+void Jersey::paintLayeredImage(QPainter &jersey_painter)
+{
+    // Background colour image
+    const QImage background_layer{generateJerseyLayer(JerseyImageServer::backgroundLayers().fileName(
+                                                          background_layer_image_id_),
+                                                      background_colour_)};
+
+    // Foreground colour image
+    const QImage foreground_layer{generateJerseyLayer(JerseyImageServer::foregroundLayers().fileName(
+                                                          foreground_layer_image_id_),
+                                                      foreground_colour_)};
+
+    // Trim colour image
+    const QImage trim_layer{
+        generateJerseyLayer(JerseyImageServer::trimLayers().fileName(trim_layer_image_id_),
+                            trim_colour_)};
+
+    // Paint the jersey background layer
+    jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, background_layer);
+
+    QSettings settings;
+
+    // Two tone layer
+    if (settings.value("two_tone_layer", false).toBool()) {
+        const QColor two_tone_colour{background_colour_.red() + 30,
+                                     background_colour_.green() + 28,
+                                     background_colour_.blue() + 23};
+
+        const QImage two_tone_layer{
+            generateJerseyLayer(":/images/two_tone_effect.png", two_tone_colour)};
+        // jersey_painter.setCompositionMode(QPainter::CompositionMode_ColorDodge);
+        jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, two_tone_layer);
+        //jersey_painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    }
+
+    // Paint the jersey foreground and trim layers
+    jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, foreground_layer);
+    jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, trim_layer);
+}
+
+// --- Paint/generate the jersey using a preset image --- //
+void Jersey::paintPresetImage(QPainter &jersey_painter)
+{
+    const QImage preset_image(JerseyImageServer::presetImages().fileName(preset_image_id_));
+    jersey_painter.drawImage(0,
+                             Dimensions::JerseyImageVerticalPadding,
+                             preset_image.scaledToHeight(Dimensions::JerseyImageHeight
+                                                             - Dimensions::JerseyImageVerticalPadding,
+                                                         Qt::SmoothTransformation));
+}
+
 // --- Pen for use with text generation --- //
 QPen Jersey::pen() const
 {
@@ -182,4 +219,23 @@ QPen Jersey::pen() const
     pen.setJoinStyle(Qt::RoundJoin);
 
     return pen;
+}
+
+void Jersey::toSimpleString(QString &text) const
+{
+    text = text.trimmed();
+
+    // Remove characters to be ignored
+    text.remove(QChar(0x2122)); // Trademark
+
+    // Replace characters not corrected by normalising
+    text.replace("ø", "o");
+
+    // Remove accents and convert for Latin-1
+    text = text.normalized(QString::NormalizationForm_KD)
+               .remove(QRegularExpression("^a-zA-Z\\s\\d_:"))
+               .toLatin1();
+
+    // Remove any question marks left over from conversion to Latin-1
+    text = text.remove("?");
 }
