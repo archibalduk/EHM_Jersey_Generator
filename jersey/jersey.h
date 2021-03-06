@@ -1,10 +1,16 @@
 #ifndef JERSEY_H
 #define JERSEY_H
 
+// Application headers
+class GenericDesignServer;
+class TeamDesignServer;
+class Text;
+
 // Qt headers
 #include <QColor>
 #include <QFont>
 class QImage;
+#include <random>
 #include <QPen>
 #include <QPixmap>
 #include <QString>
@@ -27,11 +33,12 @@ public:
     inline QPixmap pixmap() const { return QPixmap::fromImage(*image_); }
 
     // Get default colour values
-    inline static QColor defaultBackgroundColour() { return QColor(193, 65, 66); }
-    inline static QColor defaultForegroundColour() { return QColor(0, 0, 0); }
-    inline static QColor defaultTrimColour() { return QColor(255, 255, 255); }
+    inline static QColor defaultBackgroundColour() { return QColor(10, 40, 70); }
+    inline static QColor defaultForegroundColour() { return QColor(176, 0, 0); }
+    inline static QColor defaultTrimColour() { return QColor(255, 208, 0); }
 
     // Set data
+    void setColours(const QString &background, const QString &foreground, const QString &trim);
     inline void setColours(const QColor &background, const QColor &foreground, const QColor &trim)
     {
         background_colour_ = background;
@@ -39,6 +46,9 @@ public:
         trim_colour_ = trim;
     }
     inline void setJerseyNumber(const qint16 jersey_number) { jersey_number_ = jersey_number; }
+    void setImages(const Text &club_name,
+                   const GenericDesignServer &generic_jersey_designs,
+                   const TeamDesignServer &team_jersey_designs);
     inline void setImages(const qint32 foreground_layer_image,
                           const qint32 trim_layer_image,
                           const qint32 preset_image)
@@ -54,9 +64,17 @@ public:
 
 private:
     // Colours
+    qint32 createColourValue(const qint32 value);
     QColor background_colour_;
     QColor foreground_colour_;
     QColor trim_colour_;
+
+    // Generic image selection
+    static std::default_random_engine random_generator_;
+    void selectGenericLayersByClubName(const Text &club_name,
+                                       const GenericDesignServer &generic_jersey_designs);
+    void selectPureRandomLayers();
+    void selectRandomLayersByClubName(const Text &club_name);
 
     // Image generation
     QImage generateJerseyLayer(const QString &file_name, QColor colour);
@@ -80,9 +98,6 @@ private:
     // Player details
     qint16 jersey_number_;
     QString surname_;
-
-    // Text functions
-    void toSimpleString(QString &text) const;
 };
 
 #endif // JERSEY_H

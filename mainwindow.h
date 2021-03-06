@@ -2,6 +2,7 @@
 #define MAIN_WINDOW_H
 
 // Application headers
+class BatchGeneratorWidget;
 class PreviewWidget;
 class SettingsWidget;
 
@@ -17,6 +18,7 @@ public:
     ~MainWindow();
 
 private:
+    BatchGeneratorWidget *batch_generator_widget_;
     PreviewWidget *preview_widget_;
     SettingsWidget *settings_widget_;
 };

@@ -13,6 +13,7 @@ public:
     // Get data
     inline QString displayName() const { return display_name_; }
     inline QString fileName() const { return file_name_; }
+    QString simpleName() const;
 
 private:
     QString display_name_;

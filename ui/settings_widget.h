@@ -2,7 +2,7 @@
 #define SETTINGS_WIDGET_H
 
 // Application headers
-#include "../dimensions.h"
+#include "../common/dimensions.h"
 #include "../jersey/font_server.h"
 
 // Qt headers
@@ -35,9 +35,12 @@ private:
     QSpinBox *createSpinBox(const QString &registry_settings_name,
                             QWidget *parent,
                             const qint32 minimum_value,
-                            const qint32 maximum_value);
+                            const qint32 maximum_value,
+                            const qint32 default_value = 0);
 
     enum ENUM_RANGES {
+        MINIMUM_IMAGE_QUALITY = -1,
+        MAXIMUM_IMAGE_QUALITY = 100,
         MINIMUM_HORIZONTAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageWidth,
         MAXIMUM_HORIZONTAL_POSITION_OFFSET = Dimensions::JerseyImageWidth,
         MINIMUM_VERTICAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageHeight,

@@ -1,5 +1,8 @@
 #include "jersey_image_item.h"
 
+// Application headers
+#include "../common/text.h"
+
 // Qt headers
 #include <QFileInfo>
 
@@ -11,4 +14,11 @@ JerseyImageItem::JerseyImageItem(const QString &file_name, const QString &displa
         const QFileInfo fi(file_name_);
         display_name_ = fi.baseName();
     }
+}
+
+// --- Return display name simple text --- //
+QString JerseyImageItem::simpleName() const
+{
+    Text text(display_name_);
+    return text.simpleStringLowerCase();
 }

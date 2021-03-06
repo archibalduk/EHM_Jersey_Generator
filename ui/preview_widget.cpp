@@ -1,7 +1,7 @@
 #include "preview_widget.h"
 
 // Application headers
-#include "../dimensions.h"
+#include "../common/dimensions.h"
 #include "../jersey/jersey_image_server.h"
 #include "colour_widget.h"
 
@@ -35,6 +35,9 @@ PreviewWidget::PreviewWidget(QWidget *parent) : QWidget(parent)
     auto layout{new QHBoxLayout(this)};
     layout->addWidget(jersey_image_preview_);
     layout->addWidget(settings_widget);
+
+    // Initial jersey preview
+    onPreview();
 }
 
 // --- Create the settings widget --- //
@@ -84,12 +87,24 @@ QGroupBox *PreviewWidget::createLayerSelectionGroup()
     // Designs/layers
     jersey_selector_foreground_ = new QComboBox(group);
     JerseyImageServer::foregroundLayers().setComboBox(jersey_selector_foreground_);
+    QObject::connect(jersey_selector_foreground_,
+                     &QComboBox::currentIndexChanged,
+                     this,
+                     &PreviewWidget::onPreview);
 
     jersey_selector_trim_ = new QComboBox(group);
     JerseyImageServer::trimLayers().setComboBox(jersey_selector_trim_);
+    QObject::connect(jersey_selector_trim_,
+                     &QComboBox::currentIndexChanged,
+                     this,
+                     &PreviewWidget::onPreview);
 
     jersey_selector_preset_ = new QComboBox(group);
     JerseyImageServer::presetImages().setComboBox(jersey_selector_preset_);
+    QObject::connect(jersey_selector_preset_,
+                     &QComboBox::currentIndexChanged,
+                     this,
+                     &PreviewWidget::onPreview);
 
     // Layer/preset options
     use_jersey_layer_images_ = new QRadioButton(tr("Use layer images"), group);

@@ -2,7 +2,7 @@
 #define FONT_SERVER_H
 
 // Application headers
-#include "../dimensions.h"
+#include "../common/dimensions.h"
 #include "font_item.h"
 
 // Qt headers

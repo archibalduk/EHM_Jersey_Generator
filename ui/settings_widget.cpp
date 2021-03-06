@@ -1,7 +1,7 @@
 #include "settings_widget.h"
 
 // Application headers
-#include "../dimensions.h"
+#include "../common/dimensions.h"
 
 // Qt headers
 #include <QCheckBox>
@@ -33,12 +33,19 @@ QGroupBox *SettingsWidget::createGeneralSettingsGroup()
     font_selector_ = new QComboBox(group);
     font_server_.setComboBox(font_selector_);
 
+    auto image_quality{createSpinBox("image_quality",
+                                     group,
+                                     MINIMUM_IMAGE_QUALITY,
+                                     MAXIMUM_IMAGE_QUALITY,
+                                     MINIMUM_IMAGE_QUALITY)};
+
     auto accented_characters{createCheckBox("accented_characters", group)};
     auto two_tone_layer{createCheckBox("two_tone_layer", group)};
     auto upper_case_name_text{createCheckBox("upper_case_name_text", group, true)};
 
     auto layout{new QFormLayout(group)};
     layout->addRow(tr("Font:"), font_selector_);
+    layout->addRow(tr("Image quality:"), image_quality);
     layout->addRow(tr("Allow accented characters:"), accented_characters);
     layout->addRow(tr("Two tone effect:"), two_tone_layer);
     layout->addRow(tr("Upper case text:"), upper_case_name_text);
@@ -96,13 +103,14 @@ QCheckBox *SettingsWidget::createCheckBox(const QString &registry_settings_name,
 QSpinBox *SettingsWidget::createSpinBox(const QString &registry_settings_name,
                                         QWidget *parent,
                                         const qint32 minimum_value,
-                                        const qint32 maximum_value)
+                                        const qint32 maximum_value,
+                                        const qint32 default_value)
 {
     auto spin_box{new QSpinBox(parent)};
     spin_box->setObjectName(registry_settings_name);
     spin_box->setRange(minimum_value, maximum_value);
     QSettings settings;
-    spin_box->setValue(settings.value(spin_box->objectName(), 0).toInt());
+    spin_box->setValue(settings.value(spin_box->objectName(), default_value).toInt());
     QObject::connect(spin_box, &QSpinBox::valueChanged, this, &SettingsWidget::setIntegerSetting);
 
     return spin_box;

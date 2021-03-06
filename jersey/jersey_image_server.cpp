@@ -24,6 +24,26 @@ void JerseyImageServer::setComboBox(QComboBox *combo)
     }
 }
 
+// --- Find jersey id from the jersey name --- //
+qint32 JerseyImageServer::find(const QString &name) const
+{
+    return jersey_name_list_.value(name, NO_RESULT);
+}
+
+// --- Find jersey id from the percentage position in the jerseys_ vector --- //
+qint32 JerseyImageServer::find(const qreal &percentage) const
+{
+    const auto final_element_position{jerseys_.size() - 1};
+    const auto element_position{round(percentage * static_cast<qreal>(final_element_position))};
+
+    if (element_position < 0)
+        return 0;
+    else if (element_position > final_element_position)
+        return final_element_position;
+
+    return element_position;
+}
+
 // --- Get file name of the chosen image --- //
 QString JerseyImageServer::fileName(qint32 i) const
 {
@@ -62,6 +82,14 @@ qint32 JerseyImageServer::addFolder(const QString &folder_path)
         addFile(QString("%1/%2").arg(dir.absolutePath(), itr));
 
     return static_cast<qint32>(jerseys_.size());
+}
+
+// --- Initialise the jersey name hash table --- //
+void JerseyImageServer::initHashTable()
+{
+    const auto size{static_cast<qint32>(jerseys_.size())};
+    for (qint32 i = 0; i < size; ++i)
+        jersey_name_list_.insert(jerseys_[i].simpleName(), i);
 }
 
 // --- Sanity check the current jersey --- //
@@ -118,18 +146,24 @@ void JerseyImageServer::initStaticJerseyServers()
     // Background layers
     background_layers_.addFile(":/images/default_background.png", QObject::tr("Default"));
     background_layers_.addFolder("layer_background");
+    background_layers_.initHashTable();
 
     // Foreground layers
     foreground_layers_.addFile(":/images/default_foreground.png", QObject::tr("Default"));
     foreground_layers_.addFolder("layer_foreground");
+    foreground_layers_.addFolder("layer_trim");
+    foreground_layers_.initHashTable();
 
     // Trim layers
     trim_layers_.addFile(":/images/default_trim.png", QObject::tr("Default"));
     trim_layers_.addFolder("layer_trim");
+    trim_layers_.addFolder("layer_foreground");
+    trim_layers_.initHashTable();
 
     // Presets
     preset_images_.addFile(":/images/default_preset_image.png", QObject::tr("Default"));
     preset_images_.addFolder("jersey_presets");
+    preset_images_.initHashTable();
 
     static_jersey_servers_initialised_ = true;
 }
