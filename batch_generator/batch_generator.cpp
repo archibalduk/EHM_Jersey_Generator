@@ -38,6 +38,10 @@ BatchGenerator::BatchGenerator(const QString &input_file_path,
     generic_jersey_designs_.init(generic_jersey_design_file_path);
     if (settings.value("use_team_layer_designs", true).toBool())
         team_jersey_designs_.init(team_jersey_design_file_path);
+
+    // Set text random seed
+    Text::setRandomSeed(
+        settings.value("average_character_random_seed", Text::MINIMUM_RANDOM_SEED).toDouble());
 }
 
 // --- Destructor --- //

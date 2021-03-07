@@ -3,6 +3,9 @@
 // Qt headers
 #include <QRegularExpression>
 
+// --- Static data --- //
+qreal Text::random_seed_{0.0};
+
 /* ====================== */
 /*      Text Wrapper      */
 /* ====================== */
@@ -25,7 +28,7 @@ qreal Text::averageCharacterValuePercentage() const
 
     const auto average{static_cast<qreal>(sum) / static_cast<qreal>(size)};
 
-    return average - floor(average);
+    return (average - floor(average)) + randomSeed();
 }
 
 // --- Return the text as a simple string --- //

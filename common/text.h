@@ -19,8 +19,17 @@ public:
     inline QString text() const { return text_string_; }
     static void toSimpleString(QString &text);
 
+    // Random seed
+    inline qreal randomSeed() const { return random_seed_; }
+    static inline void setRandomSeed(const qreal rs) { random_seed_ = rs; }
+    static constexpr qreal MINIMUM_RANDOM_SEED{0.0};
+    static constexpr qreal MAXIMUM_RANDOM_SEED{0.9999};
+
 private:
     QString text_string_;
+
+    // Random seed
+    static qreal random_seed_;
 };
 
 #endif // TEXT_H

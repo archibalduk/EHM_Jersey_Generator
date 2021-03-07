@@ -167,7 +167,7 @@ void Jersey::selectPureRandomLayers()
 void Jersey::selectRandomLayersByClubName(const Text &club_name)
 {
     const auto club_name_pct{club_name.averageCharacterValuePercentage()};
-    qInfo() << club_name.text() << club_name_pct;
+
     setImages(JerseyImageServer::foregroundLayers().find(club_name_pct),
               JerseyImageServer::trimLayers().find(club_name_pct),
               JerseyImageServer::NO_RESULT);

@@ -5,6 +5,7 @@
 #include "registry_settings_widget_server.h"
 
 // Qt headers
+class QComboBox;
 class QGroupBox;
 class QLineEdit;
 class QPushButton;
@@ -19,6 +20,18 @@ public:
 private:
     // Design selection
     QGroupBox *createDesignSelectionWidget();
+
+    // Generic design settings
+    QGroupBox *createGenericDesignSettingsWidget();
+    QComboBox *generic_design_method_selector_;
+
+    enum ENUM_GENERIC_DESIGN_METHOD_SELECTOR_INDEXES {
+        FIXED_LAYERS,
+        GENERIC_LAYERS_BY_CLUB_NAME,
+        PURE_RANDOM,
+        RANDOM_LAYERS_BY_CLUB_NAME,
+        GENERIC_DESIGN_METHOD_SELECTOR_INDEX_COUNT
+    };
 
     // File paths
     QGroupBox *createFilePathWidget();

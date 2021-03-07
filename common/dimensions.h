@@ -27,11 +27,11 @@ enum ENUM_JERSEY_DIMENSIONS {
 
 enum ENUM_USER_INTERFACE_DIMENSIONS {
     // Preview label
-    PreviewWidth = 200,
+    PreviewWidth = 220,
     PreviewHeight = JerseyImageHeight,
     // Widget panel
     WidgetPanelCount = 2,
-    WidgetPanelWidth = 200,
+    WidgetPanelWidth = 300,
     // Application window
     WindowPadding = 10,
     WindowWidth = PreviewWidth + (WidgetPanelWidth * WidgetPanelCount)
