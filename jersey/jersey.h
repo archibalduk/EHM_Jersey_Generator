@@ -60,7 +60,12 @@ public:
     inline void setSurname(const QString &surname) { surname_ = surname; }
     inline void usePresetImage(const bool b) { use_preset_image_ = b; }
 
-    enum ENUM_FLAGS { MINIMUM_JERSEY_NUMBER = 1, MAXIMUM_JERSEY_NUMBER = 99 };
+    enum ENUM_FLAGS {
+        MINIMUM_JERSEY_NUMBER = 1,
+        MAXIMUM_JERSEY_NUMBER = 99,
+        DEFAULT_TRIM_COLOUR_THRESHOLD = 60,
+        SAFE_TRIM_COLOUR_GAP = 70
+    };
 
 private:
     // Colours

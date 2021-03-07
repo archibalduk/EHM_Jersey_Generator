@@ -39,14 +39,16 @@ private:
                             const qint32 default_value = 0);
 
     enum ENUM_RANGES {
-        MINIMUM_IMAGE_QUALITY = -1,
-        MAXIMUM_IMAGE_QUALITY = 100,
         MINIMUM_HORIZONTAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageWidth,
         MAXIMUM_HORIZONTAL_POSITION_OFFSET = Dimensions::JerseyImageWidth,
+        MINIMUM_IMAGE_QUALITY = -1,
+        MAXIMUM_IMAGE_QUALITY = 100,
         MINIMUM_VERTICAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageHeight,
         MAXIMUM_VERTICAL_POSITION_OFFSET = Dimensions::JerseyImageHeight,
         MINIMUM_TEXT_SIZE_OFFSET = -100,
-        MAXIMUM_TEXT_SIZE_OFFSET = 100
+        MAXIMUM_TEXT_SIZE_OFFSET = 100,
+        MINIMUM_TRIM_COLOUR_THRESHOLD = 0,
+        MAXIMUM_TRIM_COLOUR_THRESHOLD = 255
     };
 
 private slots:

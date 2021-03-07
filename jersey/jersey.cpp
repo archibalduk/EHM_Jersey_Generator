@@ -304,7 +304,31 @@ void Jersey::paintPresetImage(QPainter &jersey_painter)
 // --- Pen for use with text generation --- //
 QPen Jersey::pen() const
 {
-    QPen pen(trim_colour_, Dimensions::PenThickness);
+    // Validate the colour (trim colours similar to the background will result in the foreground colour being used)
+    QSettings settings;
+    const auto trim_colour_threshold{
+        settings.value("trim_colour_threshold", DEFAULT_TRIM_COLOUR_THRESHOLD).toInt()};
+    std::vector<qint32> trim_gap{abs(background_colour_.red() - trim_colour_.red()),
+                                 abs(background_colour_.green() - trim_colour_.green()),
+                                 abs(background_colour_.blue() - trim_colour_.blue())};
+
+    auto colour{&trim_colour_};
+    auto bad_count{0};
+
+    for (const auto &itr : trim_gap) {
+        if (itr <= trim_colour_threshold) // Bad = channel difference within trim colour threshold
+            ++bad_count;
+        else if (itr
+                 >= SAFE_TRIM_COLOUR_GAP) // Good = channel difference is at least the same as the safe colour gap
+            --bad_count;
+    }
+
+    if (bad_count
+        > 1) // Use the foreground colour if more than one trim colour channel is within the threshold of the background channels
+        colour = &foreground_colour_;
+
+    // Set the pen
+    QPen pen(*colour, Dimensions::PenThickness);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);
 
