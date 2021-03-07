@@ -11,51 +11,16 @@ JerseyImageServer JerseyImageServer::trim_layers_;
 JerseyImageServer JerseyImageServer::preset_images_;
 bool JerseyImageServer::static_jersey_servers_initialised_ = false;
 
+/* ============================= */
+/*      Jersey Image Server      */
+/* ============================= */
+
 // --- Constructor --- //
 JerseyImageServer::JerseyImageServer() {}
 
-// --- Populate and initialise combo box with jersey item names --- //
-void JerseyImageServer::setComboBox(QComboBox *combo)
-{
-    const auto size{static_cast<qint32>(jerseys_.size())};
-    for (qint32 i = 0; i < size; ++i) {
-        // Row id numbers displayer with leading zeros e.g. 001, 002, etc
-        combo->addItem(QString("%1 - %2").arg(i, 3, 10, QChar('0')).arg(jerseys_[i].displayName()));
-    }
-}
-
-// --- Find jersey id from the jersey name --- //
-qint32 JerseyImageServer::find(const QString &name) const
-{
-    return jersey_name_list_.value(name, NO_RESULT);
-}
-
-// --- Find jersey id from the percentage position in the jerseys_ vector --- //
-qint32 JerseyImageServer::find(const qreal &percentage) const
-{
-    const auto final_element_position{jerseys_.size() - 1};
-    const auto element_position{round(percentage * static_cast<qreal>(final_element_position))};
-
-    if (element_position < 0)
-        return 0;
-    else if (element_position > final_element_position)
-        return final_element_position;
-
-    return element_position;
-}
-
-// --- Get file name of the chosen image --- //
-QString JerseyImageServer::fileName(qint32 i) const
-{
-    if (!checkJersey(i)) {
-        if (jerseys_.size() > 0)
-            return jerseys_[0].fileName();
-
-        return QString();
-    }
-
-    return jerseys_[i].fileName();
-}
+/* ================== */
+/*      Add Data      */
+/* ================== */
 
 // --- Add a single image file --- //
 qint32 JerseyImageServer::addFile(const QString &file_name, const QString &display_name)
@@ -84,22 +49,9 @@ qint32 JerseyImageServer::addFolder(const QString &folder_path)
     return static_cast<qint32>(jerseys_.size());
 }
 
-// --- Initialise the jersey name hash table --- //
-void JerseyImageServer::initHashTable()
-{
-    const auto size{static_cast<qint32>(jerseys_.size())};
-    for (qint32 i = 0; i < size; ++i)
-        jersey_name_list_.insert(jerseys_[i].simpleName(), i);
-}
-
-// --- Sanity check the current jersey --- //
-bool JerseyImageServer::checkJersey(qint32 i) const
-{
-    if (i >= 0 && i < static_cast<qint32>(jerseys_.size()))
-        return true;
-
-    return false;
-}
+/* ================== */
+/*      Get Data      */
+/* ================== */
 
 // --- Get background layers jersey server --- //
 JerseyImageServer &JerseyImageServer::backgroundLayers()
@@ -108,6 +60,39 @@ JerseyImageServer &JerseyImageServer::backgroundLayers()
         initStaticJerseyServers();
 
     return background_layers_;
+}
+
+// --- Get file name of the chosen image --- //
+QString JerseyImageServer::fileName(qint32 i) const
+{
+    if (!checkJersey(i)) {
+        if (jerseys_.size() > 0)
+            return jerseys_[0].fileName();
+
+        return QString();
+    }
+
+    return jerseys_[i].fileName();
+}
+
+// --- Find jersey id from the jersey name --- //
+qint32 JerseyImageServer::find(const QString &name) const
+{
+    return jersey_name_list_.value(name, NO_RESULT);
+}
+
+// --- Find jersey id from the percentage position in the jerseys_ vector --- //
+qint32 JerseyImageServer::find(const qreal &percentage) const
+{
+    const auto final_element_position{jerseys_.size() - 1};
+    const auto element_position{round(percentage * static_cast<qreal>(final_element_position))};
+
+    if (element_position < 0)
+        return 0;
+    else if (element_position > final_element_position)
+        return static_cast<qint32>(final_element_position);
+
+    return element_position;
 }
 
 // --- Get foreground layers jersey server --- //
@@ -135,6 +120,18 @@ JerseyImageServer &JerseyImageServer::presetImages()
         initStaticJerseyServers();
 
     return preset_images_;
+}
+
+/* ======================== */
+/*      Initialisation      */
+/* ======================== */
+
+// --- Initialise the jersey name hash table --- //
+void JerseyImageServer::initHashTable()
+{
+    const auto size{static_cast<qint32>(jerseys_.size())};
+    for (qint32 i = 0; i < size; ++i)
+        jersey_name_list_.insert(jerseys_[i].simpleName(), i);
 }
 
 // --- Initialise static jerseys --- //
@@ -166,4 +163,31 @@ void JerseyImageServer::initStaticJerseyServers()
     preset_images_.initHashTable();
 
     static_jersey_servers_initialised_ = true;
+}
+
+/* ================== */
+/*      Set Data      */
+/* ================== */
+
+// --- Populate and initialise combo box with jersey item names --- //
+void JerseyImageServer::setComboBox(QComboBox *combo)
+{
+    const auto size{static_cast<qint32>(jerseys_.size())};
+    for (qint32 i = 0; i < size; ++i) {
+        // Row id numbers displayer with leading zeros e.g. 001, 002, etc
+        combo->addItem(QString("%1 - %2").arg(i, 3, 10, QChar('0')).arg(jerseys_[i].displayName()));
+    }
+}
+
+/* ==================== */
+/*      Validation      */
+/* ==================== */
+
+// --- Sanity check the current jersey --- //
+bool JerseyImageServer::checkJersey(qint32 i) const
+{
+    if (i >= 0 && i < static_cast<qint32>(jerseys_.size()))
+        return true;
+
+    return false;
 }

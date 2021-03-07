@@ -4,8 +4,16 @@
 #include "../common/text.h"
 #include "jersey_image_server.h"
 
+/* =============================== */
+/*      Generic Design Server      */
+/* =============================== */
+
 // --- Constructor --- //
 GenericDesignServer::GenericDesignServer() {}
+
+/* ================== */
+/*      File i/o      */
+/* ================== */
 
 // --- Load the spreadsheet and process the designs --- //
 void GenericDesignServer::init(const QString &file_path)
@@ -50,6 +58,10 @@ void GenericDesignServer::readSpreadsheetRow(QXlsx::Document &spreadsheet, const
     if (generic_design_item.isValid())
         jersey_designs_.push_back(generic_design_item);
 }
+
+/* ================== */
+/*      Get Data      */
+/* ================== */
 
 // --- Find foreground jersey layer id from the percentage position in the jersey_designs_ vector --- //
 qint32 GenericDesignServer::findForeground(const qreal &percentage) const

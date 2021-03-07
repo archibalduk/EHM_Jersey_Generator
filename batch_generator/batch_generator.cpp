@@ -13,6 +13,10 @@
 #include <QProgressDialog>
 #include <QtConcurrent>
 
+/* ========================= */
+/*      Batch Generator      */
+/* ========================= */
+
 // --- Constructor --- //
 BatchGenerator::BatchGenerator(const QString &input_file_path,
                                const QString &output_file_path,
@@ -25,8 +29,12 @@ BatchGenerator::BatchGenerator(const QString &input_file_path,
     team_jersey_designs_.init(team_jersey_design_file_path);
 }
 
+/* =================== */
+/*      Generator      */
+/* =================== */
+
 // --- Batch jersey image generation --- //
-bool BatchGenerator::generate()
+bool BatchGenerator::generate() const
 {
     // Timer and progress dialog
     QProgressDialog progress(QObject::tr("Processing spreadsheet"), QString(), 0, 1);

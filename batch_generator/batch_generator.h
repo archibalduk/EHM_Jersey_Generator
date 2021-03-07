@@ -20,7 +20,7 @@ public:
                    const QString &team_jersey_design_file_path);
 
     // Image generation
-    bool generate();
+    bool generate() const;
 
 private:
     // File/folder paths

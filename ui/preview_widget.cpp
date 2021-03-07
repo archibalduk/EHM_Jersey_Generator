@@ -19,6 +19,10 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
+/* ======================== */
+/*      Preview Widget      */
+/* ======================== */
+
 // --- Constructor --- //
 PreviewWidget::PreviewWidget(QWidget *parent) : QWidget(parent)
 {
@@ -39,6 +43,67 @@ PreviewWidget::PreviewWidget(QWidget *parent) : QWidget(parent)
     // Initial jersey preview
     onPreview();
 }
+
+/* ================== */
+/*      File i/o      */
+/* ================== */
+
+// --- Save the image --- //
+void PreviewWidget::onSave()
+{
+    const auto file_name{QFileDialog::getSaveFileName(this,
+                                                      tr("Save Jersey Image"),
+                                                      QString("%1/ehm_%2_%3.png")
+                                                          .arg(QDir::homePath(),
+                                                               jersey_name_input_->text(),
+                                                               jersey_number_input_->text()),
+                                                      tr("Images (*.png)"))};
+
+    if (file_name.isEmpty())
+        return;
+
+    const auto jersey{generateJersey()};
+    jersey.save(file_name);
+}
+
+/* =================== */
+/*      Generator      */
+/* =================== */
+
+// --- On jersey image layer/preset setting change --- //
+void PreviewWidget::onJerseyImageSettingChange(const bool use_layers)
+{
+    jersey_selector_foreground_->setEnabled(use_layers);
+    jersey_selector_trim_->setEnabled(use_layers);
+    jersey_selector_preset_->setEnabled(!use_layers);
+}
+
+// --- Generate the jersey --- //
+Jersey PreviewWidget::generateJersey() const
+{
+    Jersey jersey(jersey_name_input_->text(), jersey_number_input_->value());
+    jersey.setColours(colour_selector_background_->colour(),
+                      colour_selector_foreground_->colour(),
+                      colour_selector_trim_->colour());
+    jersey.setImages(jersey_selector_foreground_->currentIndex(),
+                     jersey_selector_trim_->currentIndex(),
+                     jersey_selector_preset_->currentIndex());
+    jersey.usePresetImage(use_jersey_preset_image_->isChecked());
+    jersey.generate();
+    jersey_image_preview_->setPixmap(jersey.pixmap());
+
+    return jersey;
+}
+
+// --- Generate and display preview jersey --- //
+void PreviewWidget::onPreview()
+{
+    generateJersey();
+}
+
+/* ================== */
+/*      Settings      */
+/* ================== */
 
 // --- Create the settings widget --- //
 QWidget *PreviewWidget::createSettingsWidget()
@@ -63,6 +128,7 @@ QWidget *PreviewWidget::createSettingsWidget()
     return widget;
 }
 
+// --- Create the colour selection group --- //
 QGroupBox *PreviewWidget::createColourSelectionGroup()
 {
     auto group{new QGroupBox(tr("Colours"), this)};
@@ -80,6 +146,7 @@ QGroupBox *PreviewWidget::createColourSelectionGroup()
     return group;
 }
 
+// --- Create the layer selection group --- //
 QGroupBox *PreviewWidget::createLayerSelectionGroup()
 {
     auto group{new QGroupBox(tr("Jersey Design"), this)};
@@ -124,6 +191,7 @@ QGroupBox *PreviewWidget::createLayerSelectionGroup()
     return group;
 }
 
+// --- Creat the text details widget --- //
 QGroupBox *PreviewWidget::createTextDetailsGroup()
 {
     auto group{new QGroupBox(tr("Text"), this)};
@@ -139,52 +207,4 @@ QGroupBox *PreviewWidget::createTextDetailsGroup()
     layout->addRow(tr("Jersey number:"), jersey_number_input_);
 
     return group;
-}
-
-// --- On jersey image layer/preset setting change --- //
-void PreviewWidget::onJerseyImageSettingChange(const bool use_layers)
-{
-    jersey_selector_foreground_->setEnabled(use_layers);
-    jersey_selector_trim_->setEnabled(use_layers);
-    jersey_selector_preset_->setEnabled(!use_layers);
-}
-
-// --- Generate the jersey --- //
-Jersey PreviewWidget::generateJersey() const
-{
-    Jersey jersey(jersey_name_input_->text(), jersey_number_input_->value());
-    jersey.setColours(colour_selector_background_->colour(),
-                      colour_selector_foreground_->colour(),
-                      colour_selector_trim_->colour());
-    jersey.setImages(jersey_selector_foreground_->currentIndex(),
-                     jersey_selector_trim_->currentIndex(),
-                     jersey_selector_preset_->currentIndex());
-    jersey.usePresetImage(use_jersey_preset_image_->isChecked());
-    jersey.generate();
-    jersey_image_preview_->setPixmap(jersey.pixmap());
-
-    return jersey;
-}
-
-// --- Generate and display preview jersey --- //
-void PreviewWidget::onPreview()
-{
-    generateJersey();
-}
-
-void PreviewWidget::onSave()
-{
-    const auto file_name{QFileDialog::getSaveFileName(this,
-                                                      tr("Save Jersey Image"),
-                                                      QString("%1/ehm_%2_%3.png")
-                                                          .arg(QDir::homePath(),
-                                                               jersey_name_input_->text(),
-                                                               jersey_number_input_->text()),
-                                                      tr("Images (*.png)"))};
-
-    if (file_name.isEmpty())
-        return;
-
-    const auto jersey{generateJersey()};
-    jersey.save(file_name);
 }

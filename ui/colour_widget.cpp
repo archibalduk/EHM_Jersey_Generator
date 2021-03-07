@@ -4,6 +4,10 @@
 #include <QHBoxLayout>
 #include <QSpinBox>
 
+/* ======================= */
+/*      Colour Widget      */
+/* ======================= */
+
 // --- Constructor --- //
 ColourWidget::ColourWidget(const QColor &initial_colour, QWidget *parent) : QWidget(parent)
 {
@@ -25,6 +29,10 @@ ColourWidget::ColourWidget(const QColor &initial_colour, QWidget *parent) : QWid
     layout->addWidget(spin_box_green_);
     layout->addWidget(spin_box_blue_);
 }
+
+/* ================== */
+/*      Get Data      */
+/* ================== */
 
 // --- Get colour --- //
 QColor ColourWidget::colour() const

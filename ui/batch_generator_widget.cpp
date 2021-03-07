@@ -14,6 +14,10 @@
 #include <QSettings>
 #include <QVBoxLayout>
 
+/* ================================ */
+/*      Batch Generator Widget      */
+/* ================================ */
+
 // --- Constructor --- //
 BatchGeneratorWidget::BatchGeneratorWidget(QWidget *parent) : QWidget(parent)
 {
@@ -38,6 +42,10 @@ BatchGeneratorWidget::~BatchGeneratorWidget()
                       generic_jersey_design_file_path_->text());
     settings.setValue(output_folder_path_->objectName(), output_folder_path_->text());
 }
+
+/* =========================== */
+/*      File Path Widgets      */
+/* =========================== */
 
 // --- Create the file path widget --- //
 QGroupBox *BatchGeneratorWidget::createFilePathWidget()
@@ -168,8 +176,12 @@ QWidget *BatchGeneratorWidget::createFilePathItem(QLineEdit *line_edit,
     return widget;
 }
 
+/* =================== */
+/*      Generator      */
+/* =================== */
+
 // --- Import and generate the jerseys --- //
-void BatchGeneratorWidget::onGenerate()
+void BatchGeneratorWidget::onGenerate() const
 {
     BatchGenerator generator(input_file_path_->text(),
                              output_folder_path_->text(),

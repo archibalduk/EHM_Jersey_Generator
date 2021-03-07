@@ -9,6 +9,10 @@
 qint32 FontServer::current_font_id_{0};
 std::vector<FontItem> FontServer::fonts_;
 
+/* ===================== */
+/*      Font Server      */
+/* ===================== */
+
 // --- Constructor --- //
 FontServer::FontServer()
 {
@@ -17,8 +21,40 @@ FontServer::FontServer()
     checkFont();
 }
 
+/* ================== */
+/*      Get Data      */
+/* ================== */
+
+// --- Get current font display name --- //
+QString FontServer::currentFontDisplayName() const
+{
+    checkFont();
+    return fonts()[current_font_id_].displayName();
+}
+
+// --- Get current font family --- //
+QString FontServer::currentFontFamily() const
+{
+    checkFont();
+    return fonts()[current_font_id_].fontFamily();
+}
+
+// --- Get current font file name --- //
+QString FontServer::currentFontFileName() const
+{
+    checkFont();
+    return fonts()[current_font_id_].fileName();
+}
+
+// --- Get current font id --- //
+qint32 FontServer::currentFont() const
+{
+    checkFont();
+    return current_font_id_;
+}
+
 // --- Create and return the font --- //
-QFont FontServer::font(const qint32 point_size, const qint32 weight)
+QFont FontServer::font(const qint32 point_size, const qint32 weight) const
 {
     QFont font(currentFontFamily(), point_size, weight);
     font.setLetterSpacing(QFont::AbsoluteSpacing, Dimensions::FontLetterSpacing);
@@ -28,48 +64,8 @@ QFont FontServer::font(const qint32 point_size, const qint32 weight)
     return font;
 }
 
-// --- Populate and initialise combo box with font names --- //
-void FontServer::setComboBox(QComboBox *combo)
-{
-    const auto list{fonts()};
-    for (const auto &itr : list) {
-        combo->addItem(itr.displayName());
-    }
-
-    combo->setCurrentIndex(currentFont());
-    QObject::connect(combo, &QComboBox::currentIndexChanged, this, &FontServer::setFont);
-}
-
-// --- Get current font display name --- //
-QString FontServer::currentFontDisplayName()
-{
-    checkFont();
-    return fonts()[current_font_id_].displayName();
-}
-
-// --- Get current font family --- //
-QString FontServer::currentFontFamily()
-{
-    checkFont();
-    return fonts()[current_font_id_].fontFamily();
-}
-
-// --- Get current font file name --- //
-QString FontServer::currentFontFileName()
-{
-    checkFont();
-    return fonts()[current_font_id_].fileName();
-}
-
-// --- Get current font id --- //
-qint32 FontServer::currentFont()
-{
-    checkFont();
-    return current_font_id_;
-}
-
 // --- Get list of available fonts --- //
-std::vector<FontItem> &FontServer::fonts()
+std::vector<FontItem> &FontServer::fonts() const
 {
     // Populate the list of fonts if it is empty
     if (fonts_.size() < 1) {
@@ -99,22 +95,42 @@ std::vector<FontItem> &FontServer::fonts()
     return fonts_;
 }
 
-// --- Sanity check the current font --- //
-bool FontServer::checkFont()
-{
-    if (current_font_id_ >= 0 && current_font_id_ < static_cast<qint32>(fonts().size()))
-        return true;
+/* ================== */
+/*      Set Data      */
+/* ================== */
 
-    current_font_id_ = 0;
-    return false;
+// --- Populate and initialise combo box with font names --- //
+void FontServer::setComboBox(QComboBox *combo) const
+{
+    const auto list{fonts()};
+    for (const auto &itr : list) {
+        combo->addItem(itr.displayName());
+    }
+
+    combo->setCurrentIndex(currentFont());
+    QObject::connect(combo, &QComboBox::currentIndexChanged, this, &FontServer::setFont);
 }
 
 // --- Set font --- //
-void FontServer::setFont(const qint32 id)
+void FontServer::setFont(const qint32 id) const
 {
     current_font_id_ = id;
     checkFont();
 
     QSettings settings;
     settings.setValue("selected_font", current_font_id_);
+}
+
+/* ==================== */
+/*      Validation      */
+/* ==================== */
+
+// --- Sanity check the current font --- //
+bool FontServer::checkFont() const
+{
+    if (current_font_id_ >= 0 && current_font_id_ < static_cast<qint32>(fonts().size()))
+        return true;
+
+    current_font_id_ = 0;
+    return false;
 }

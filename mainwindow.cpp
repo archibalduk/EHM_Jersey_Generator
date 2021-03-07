@@ -11,6 +11,10 @@
 #include <QHBoxLayout>
 #include <QTabWidget>
 
+/* ===================== */
+/*      Main Window      */
+/* ===================== */
+
 // --- Constructor --- //
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

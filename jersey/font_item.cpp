@@ -3,6 +3,10 @@
 // Application headers
 #include <QFontDatabase>
 
+/* =================== */
+/*      Font Item      */
+/* =================== */
+
 // --- Constructor --- //
 FontItem::FontItem(const QString &file_name, const bool allow_accented_characters)
     : font_file_name_(file_name), allow_accented_characters_(allow_accented_characters)

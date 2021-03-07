@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     // Application details
     QCoreApplication::setApplicationName("EHM Jersey Generator");
-    QCoreApplication::setApplicationVersion("1.0.0-beta.5");
+    QCoreApplication::setApplicationVersion("1.0.0-beta.6");
     QCoreApplication::setOrganizationName("EHM The Blue Line");
     QCoreApplication::setOrganizationDomain("ehmtheblueline.com");
 

@@ -24,4 +24,4 @@ private:
     enum ENUM_FLAGS { RGB_MINUMUM = 0, RGB_MAXIMUM = 255 };
 };
 
-#endif // COLOURWIDGET_H
+#endif // COLOUR_WIDGET_H

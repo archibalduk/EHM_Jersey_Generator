@@ -14,6 +14,10 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
+/* ========================= */
+/*      Settings Widget      */
+/* ========================= */
+
 // --- Constructor --- //
 SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -25,6 +29,28 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(createTextSettingsGroup(tr("Player Name"), "name"));
     layout->addWidget(createTextSettingsGroup(tr("Jersey Number"), "number"));
 }
+
+/* ================== */
+/*      Set Data      */
+/* ================== */
+
+// --- Set a setting (bool) --- //
+void SettingsWidget::setBoolSetting(const bool b)
+{
+    QSettings settings;
+    settings.setValue(QObject::sender()->objectName(), b);
+}
+
+// --- Set a setting (integer) --- //
+void SettingsWidget::setIntegerSetting(const qint32 i)
+{
+    QSettings settings;
+    settings.setValue(QObject::sender()->objectName(), i);
+}
+
+/* ================= */
+/*      Widgets      */
+/* ================= */
 
 // --- Create general settings --- //
 QGroupBox *SettingsWidget::createGeneralSettingsGroup()
@@ -133,18 +159,4 @@ QSpinBox *SettingsWidget::createSpinBox(const QString &registry_settings_name,
     QObject::connect(spin_box, &QSpinBox::valueChanged, this, &SettingsWidget::setIntegerSetting);
 
     return spin_box;
-}
-
-// --- Set a setting (bool) --- //
-void SettingsWidget::setBoolSetting(const bool b)
-{
-    QSettings settings;
-    settings.setValue(QObject::sender()->objectName(), b);
-}
-
-// --- Set a setting (integer) --- //
-void SettingsWidget::setIntegerSetting(const qint32 i)
-{
-    QSettings settings;
-    settings.setValue(QObject::sender()->objectName(), i);
 }

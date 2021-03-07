@@ -3,8 +3,16 @@
 // Qt headers
 #include <QRegularExpression>
 
+/* ====================== */
+/*      Text Wrapper      */
+/* ====================== */
+
 // --- Constructor --- //
 Text::Text(const QString &text) : text_string_(text) {}
+
+/* ======================== */
+/*      Text Functions      */
+/* ======================== */
 
 // --- Calculate the average char value of the text as a pecentage relative to the max ASCII value--- //
 qreal Text::averageCharacterValuePercentage() const

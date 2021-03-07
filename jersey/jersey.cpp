@@ -18,6 +18,10 @@
 std::default_random_engine Jersey::random_generator_(
     std::chrono::system_clock::now().time_since_epoch().count());
 
+/* ================================ */
+/*      Jersey Image Generator      */
+/* ================================ */
+
 // --- Constructor --- //
 Jersey::Jersey(const QString &surname, const qint32 jersey_number)
     : background_colour_(defaultBackgroundColour()), foreground_colour_(defaultForegroundColour()),
@@ -40,13 +44,21 @@ Jersey::~Jersey()
     delete image_;
 }
 
-// --- File i/o --- //
+/* ================== */
+/*      File i/o      */
+/* ================== */
+
+// --- Save jersey to file --- //
 bool Jersey::save(const QString &file_name) const
 {
     QSettings settings;
     const auto image_quality{settings.value("image_quality", 0).toInt()};
     return image_->save(file_name, "png", image_quality);
 }
+
+/* =================== */
+/*      Generator      */
+/* =================== */
 
 // --- Generate image --- //
 void Jersey::generate()
@@ -94,6 +106,21 @@ void Jersey::generate()
     jersey_painter.end();
 }
 
+/* ================= */
+/*      Colours      */
+/* ================= */
+
+// --- Validate a colour value --- //
+qint32 Jersey::createColourValue(const qint32 value)
+{
+    if (value > 255)
+        return 255;
+    if (value < 0)
+        return 0;
+
+    return value;
+}
+
 // --- Set colours from strings --- //
 void Jersey::setColours(const QString &background, const QString &foreground, const QString &trim)
 {
@@ -108,47 +135,9 @@ void Jersey::setColours(const QString &background, const QString &foreground, co
         trim_colour_ = defaultTrimColour();
 }
 
-// --- Set images based on club name --- //
-void Jersey::setImages(const Text &club_name,
-                       const GenericDesignServer &generic_jersey_designs,
-                       const TeamDesignServer &team_jersey_designs)
-{
-    // FIRST: Check for a preset
-    preset_image_id_ = JerseyImageServer::presetImages().find(club_name.simpleStringLowerCase());
-    if (use_preset_image_ && preset_image_id_ > JerseyImageServer::NO_RESULT)
-        return;
-
-    use_preset_image_ = false; // Disable preset image if there was no preset image result
-
-    // SECOND: Check for a defined team jersey layer design
-    const auto team_jersey_design_id{team_jersey_designs.findTeam(club_name)};
-    if (team_jersey_design_id != JerseyImageServer::NO_RESULT) {
-        setImages(team_jersey_designs.foreground(team_jersey_design_id),
-                  team_jersey_designs.trim(team_jersey_design_id),
-                  JerseyImageServer::NO_RESULT);
-        return;
-    }
-
-    // THIRD: Use a random jersey
-    selectGenericLayersByClubName(club_name, generic_jersey_designs);
-
-    // Purely random designs (could result in some weird designs)
-    //selectPureRandomLayers();
-
-    // Random designs based on club name (could result in some weird designs)
-    //selectRandomLayersByClubName(club_name);
-}
-
-// --- Validate a colour value --- //
-qint32 Jersey::createColourValue(const qint32 value)
-{
-    if (value > 255)
-        return 255;
-    if (value < 0)
-        return 0;
-
-    return value;
-}
+/* ================================== */
+/*      Generic Jersey Selection      */
+/* ================================== */
 
 // --- Select a random generic jersey design by club name --- //
 void Jersey::selectGenericLayersByClubName(const Text &club_name,
@@ -184,6 +173,45 @@ void Jersey::selectRandomLayersByClubName(const Text &club_name)
               JerseyImageServer::NO_RESULT);
 }
 
+/* ================ */
+/*      Images      */
+/* ================ */
+
+// --- Set images based on club name --- //
+void Jersey::setImages(const Text &club_name,
+                       const GenericDesignServer &generic_jersey_designs,
+                       const TeamDesignServer &team_jersey_designs)
+{
+    // FIRST: Check for a preset
+    preset_image_id_ = JerseyImageServer::presetImages().find(club_name.simpleStringLowerCase());
+    if (use_preset_image_ && preset_image_id_ > JerseyImageServer::NO_RESULT)
+        return;
+
+    use_preset_image_ = false; // Disable preset image if there was no preset image result
+
+    // SECOND: Check for a defined team jersey layer design
+    const auto team_jersey_design_id{team_jersey_designs.findTeam(club_name)};
+    if (team_jersey_design_id != JerseyImageServer::NO_RESULT) {
+        setImages(team_jersey_designs.foreground(team_jersey_design_id),
+                  team_jersey_designs.trim(team_jersey_design_id),
+                  JerseyImageServer::NO_RESULT);
+        return;
+    }
+
+    // THIRD: Use a random jersey
+    selectGenericLayersByClubName(club_name, generic_jersey_designs);
+
+    // Purely random designs (could result in some weird designs)
+    //selectPureRandomLayers();
+
+    // Random designs based on club name (could result in some weird designs)
+    //selectRandomLayersByClubName(club_name);
+}
+
+/* ======================= */
+/*      Jersey Layers      */
+/* ======================= */
+
 // --- Generate a layer of the jersey image --- //
 QImage Jersey::generateJerseyLayer(const QString &file_name, QColor colour)
 {
@@ -205,7 +233,7 @@ QImage Jersey::generateJerseyLayer(const QString &file_name, QColor colour)
 
     return image;
 }
-#include <QDebug>
+
 // --- Generate the name layer of the image --- //
 QImage Jersey::generateNameLayer() const
 {
@@ -215,7 +243,7 @@ QImage Jersey::generateNameLayer() const
      */
 
     // Name text
-    QSettings settings;    
+    QSettings settings;
     QString name_text{(settings.value("upper_case_name_text", true).toBool()) ? surname_.toUpper()
                                                                               : surname_};
 
@@ -312,6 +340,10 @@ void Jersey::paintLayeredImage(QPainter &jersey_painter)
     jersey_painter.drawImage(0, Dimensions::JerseyImageVerticalPadding, trim_layer);
 }
 
+/* ======================== */
+/*      Jersey Presets      */
+/* ======================== */
+
 // --- Paint/generate the jersey using a preset image --- //
 void Jersey::paintPresetImage(QPainter &jersey_painter)
 {
@@ -322,6 +354,10 @@ void Jersey::paintPresetImage(QPainter &jersey_painter)
                                                              - Dimensions::JerseyImageVerticalPadding,
                                                          Qt::SmoothTransformation));
 }
+
+/* ============= */
+/*      Pen      */
+/* ============= */
 
 // --- Pen for use with text generation --- //
 QPen Jersey::pen() const

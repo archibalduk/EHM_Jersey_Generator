@@ -28,7 +28,7 @@ private:
     enum ENUM_DIMENSIONS { BUTTON_WIDTH = 100 };
 
 private slots:
-    void onGenerate();
+    void onGenerate() const;
 };
 
 #endif // BATCH_GENERATOR_WIDGET_H
