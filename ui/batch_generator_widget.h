@@ -1,20 +1,25 @@
 #ifndef BATCH_GENERATOR_WIDGET_H
 #define BATCH_GENERATOR_WIDGET_H
 
+// Application headers
+#include "registry_settings_widget_server.h"
+
 // Qt headers
 class QGroupBox;
 class QLineEdit;
 class QPushButton;
-#include <QWidget>
 
 // --- Batch generator widget --- //
-class BatchGeneratorWidget : public QWidget
+class BatchGeneratorWidget : public RegistrySettingsWidgetServer
 {
 public:
     BatchGeneratorWidget(QWidget *parent = nullptr);
     ~BatchGeneratorWidget();
 
 private:
+    // Design selection
+    QGroupBox *createDesignSelectionWidget();
+
     // File paths
     QGroupBox *createFilePathWidget();
     QWidget *createFilePathItem(QLineEdit *line_edit,

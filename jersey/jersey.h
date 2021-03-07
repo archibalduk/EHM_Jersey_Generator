@@ -3,6 +3,7 @@
 
 // Application headers
 class GenericDesignServer;
+class JerseyImageServer;
 class TeamDesignServer;
 class Text;
 
@@ -48,7 +49,8 @@ public:
     inline void setJerseyNumber(const qint16 jersey_number) { jersey_number_ = jersey_number; }
     void setImages(const Text &club_name,
                    const GenericDesignServer &generic_jersey_designs,
-                   const TeamDesignServer &team_jersey_designs);
+                   const TeamDesignServer &team_jersey_designs,
+                   const JerseyImageServer &preset_images);
     inline void setImages(const qint32 foreground_layer_image,
                           const qint32 trim_layer_image,
                           const qint32 preset_image)

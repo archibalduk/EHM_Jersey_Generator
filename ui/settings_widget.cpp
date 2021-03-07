@@ -19,7 +19,7 @@
 /* ========================= */
 
 // --- Constructor --- //
-SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
+SettingsWidget::SettingsWidget(QWidget *parent) : RegistrySettingsWidgetServer(parent)
 {
     setMinimumWidth(Dimensions::WidgetPanelWidth);
 
@@ -28,24 +28,6 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(createGeneralSettingsGroup());
     layout->addWidget(createTextSettingsGroup(tr("Player Name"), "name"));
     layout->addWidget(createTextSettingsGroup(tr("Jersey Number"), "number"));
-}
-
-/* ================== */
-/*      Set Data      */
-/* ================== */
-
-// --- Set a setting (bool) --- //
-void SettingsWidget::setBoolSetting(const bool b)
-{
-    QSettings settings;
-    settings.setValue(QObject::sender()->objectName(), b);
-}
-
-// --- Set a setting (integer) --- //
-void SettingsWidget::setIntegerSetting(const qint32 i)
-{
-    QSettings settings;
-    settings.setValue(QObject::sender()->objectName(), i);
 }
 
 /* ================= */
@@ -67,10 +49,10 @@ QGroupBox *SettingsWidget::createGeneralSettingsGroup()
                                      MINIMUM_IMAGE_QUALITY)};
 
     auto trim_colour_threshold{createSpinBox("trim_colour_threshold",
-                                     group,
-                                     MINIMUM_TRIM_COLOUR_THRESHOLD,
-                                     MAXIMUM_TRIM_COLOUR_THRESHOLD,
-                                     Jersey::DEFAULT_TRIM_COLOUR_THRESHOLD)};
+                                             group,
+                                             MINIMUM_TRIM_COLOUR_THRESHOLD,
+                                             MAXIMUM_TRIM_COLOUR_THRESHOLD,
+                                             Jersey::DEFAULT_TRIM_COLOUR_THRESHOLD)};
 
     auto accented_characters{createCheckBox("accented_characters", group)};
     auto two_tone_layer{createCheckBox("two_tone_layer", group)};
@@ -128,35 +110,4 @@ QGroupBox *SettingsWidget::createTextSettingsGroup(const QString &settings_group
     }
 
     return group;
-}
-
-// --- Create a checkbox --- //
-QCheckBox *SettingsWidget::createCheckBox(const QString &registry_settings_name,
-                                          QWidget *parent,
-                                          const bool default_value)
-{
-    auto check_box{new QCheckBox(parent)};
-    check_box->setObjectName(registry_settings_name);
-    QSettings settings;
-    check_box->setChecked(settings.value(check_box->objectName(), default_value).toBool());
-    QObject::connect(check_box, &QCheckBox::toggled, this, &SettingsWidget::setBoolSetting);
-
-    return check_box;
-}
-
-// --- Create a spinbox --- //
-QSpinBox *SettingsWidget::createSpinBox(const QString &registry_settings_name,
-                                        QWidget *parent,
-                                        const qint32 minimum_value,
-                                        const qint32 maximum_value,
-                                        const qint32 default_value)
-{
-    auto spin_box{new QSpinBox(parent)};
-    spin_box->setObjectName(registry_settings_name);
-    spin_box->setRange(minimum_value, maximum_value);
-    QSettings settings;
-    spin_box->setValue(settings.value(spin_box->objectName(), default_value).toInt());
-    QObject::connect(spin_box, &QSpinBox::valueChanged, this, &SettingsWidget::setIntegerSetting);
-
-    return spin_box;
 }

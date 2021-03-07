@@ -11,6 +11,7 @@
 #include <QFutureWatcher>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QSettings>
 #include <QtConcurrent>
 
 /* ========================= */
@@ -24,9 +25,26 @@ BatchGenerator::BatchGenerator(const QString &input_file_path,
                                const QString &team_jersey_design_file_path)
     : input_file_path_(input_file_path), output_folder_path_(output_file_path)
 {
+    QSettings settings;
+
+    // Initialise the preset jersey server (use a blank server if presets are disabled)
+    use_preset_images_ = settings.value("use_preset_images", true).toBool();
+    if (use_preset_images_)
+        preset_jersey_images_ = &JerseyImageServer::presetImages();
+    else
+        preset_jersey_images_ = new JerseyImageServer;
+
     // Process the generic and team jersey layer design files
     generic_jersey_designs_.init(generic_jersey_design_file_path);
-    team_jersey_designs_.init(team_jersey_design_file_path);
+    if (settings.value("use_team_layer_designs", true).toBool())
+        team_jersey_designs_.init(team_jersey_design_file_path);
+}
+
+// --- Destructor --- //
+BatchGenerator::~BatchGenerator()
+{
+    if (!use_preset_images_)
+        delete preset_jersey_images_;
 }
 
 /* =================== */
@@ -34,7 +52,7 @@ BatchGenerator::BatchGenerator(const QString &input_file_path,
 /* =================== */
 
 // --- Batch jersey image generation --- //
-bool BatchGenerator::generate() const
+bool BatchGenerator::generate()
 {
     // Timer and progress dialog
     QProgressDialog progress(QObject::tr("Processing spreadsheet"), QString(), 0, 1);
@@ -53,12 +71,12 @@ bool BatchGenerator::generate() const
     }
 
     // Spreadsheet dimensions
-    const auto row_count{spreadsheet.dimension().lastRow()};
-    const auto first_row{1}; // Row 0 = header row
+    const auto first_row{2}; // Row 1 = header row
+    const auto final_row{spreadsheet.dimension().lastRow() + 1};
 
     // Reset the progress dialog
-    progress.setLabelText(QObject::tr("Processing %L1 rows of data").arg(row_count - first_row));
-    progress.setMaximum(row_count);
+    progress.setLabelText(QObject::tr("Processing %L1 rows of data").arg(final_row - first_row));
+    progress.setMaximum(final_row);
     QApplication::processEvents();
 
     QElapsedTimer timer;
@@ -85,7 +103,7 @@ bool BatchGenerator::generate() const
 
     // Buffer the row references
     std::vector<qint32> buffer;
-    for (qint32 i = first_row; i < row_count; ++i)
+    for (qint32 i = first_row; i < final_row; ++i)
         buffer.push_back(i);
 
     // Jersey generation lambda
@@ -102,7 +120,8 @@ bool BatchGenerator::generate() const
             jersey.usePresetImage(true); // Use preset images where possible
             jersey.setImages(Text(spreadsheet.read(i, CLUB_NAME).toString()),
                              generic_jersey_designs_,
-                             team_jersey_designs_);
+                             team_jersey_designs_,
+                             *preset_jersey_images_);
             jersey.generate();
 
             const auto output_file_path{

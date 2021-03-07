@@ -4,6 +4,7 @@
 #include "../batch_generator/batch_generator.h"
 
 // Qt headers
+#include <QCheckBox>
 #include <QDir>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -19,10 +20,11 @@
 /* ================================ */
 
 // --- Constructor --- //
-BatchGeneratorWidget::BatchGeneratorWidget(QWidget *parent) : QWidget(parent)
+BatchGeneratorWidget::BatchGeneratorWidget(QWidget *parent) : RegistrySettingsWidgetServer(parent)
 {
     // Layout
     auto layout{new QVBoxLayout(this)};
+    layout->addWidget(createDesignSelectionWidget());
     layout->addWidget(createFilePathWidget());
 
     auto generate_button{new QPushButton(tr("Generate Jerseys"), this)};
@@ -41,6 +43,25 @@ BatchGeneratorWidget::~BatchGeneratorWidget()
     settings.setValue(generic_jersey_design_file_path_->objectName(),
                       generic_jersey_design_file_path_->text());
     settings.setValue(output_folder_path_->objectName(), output_folder_path_->text());
+}
+
+/* ================================== */
+/*      Design Selection Widgets      */
+/* ================================== */
+
+// --- Create the file path widget --- //
+QGroupBox *BatchGeneratorWidget::createDesignSelectionWidget()
+{
+    auto group{new QGroupBox(tr("Jersey Design Settings"), this)};
+
+    auto use_preset_images{createCheckBox("use_preset_images", group, true)};
+    auto use_team_layer_designs{createCheckBox("use_team_layer_designs", group, true)};
+
+    auto layout{new QFormLayout(group)};
+    layout->addRow(tr("Use preset jersey images:"), use_preset_images);
+    layout->addRow(tr("Use team layer designs:"), use_team_layer_designs);
+
+    return group;
 }
 
 /* =========================== */
@@ -148,7 +169,7 @@ QGroupBox *BatchGeneratorWidget::createFilePathWidget()
     auto layout{new QFormLayout(group)};
     layout->addRow(tr("Generic jersey designs:"), generic_jersey_design_file_path_widget);
     layout->addRow(tr("Team jersey designs:"), team_jersey_design_file_path_widget);
-    layout->addRow(tr("Player data:"), input_file_path_widget);
+    layout->addRow(tr("Input file:"), input_file_path_widget);
     layout->addRow(tr("Output folder:"), output_folder_path_widget);
 
     return group;

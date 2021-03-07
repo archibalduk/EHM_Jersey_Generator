@@ -3,6 +3,7 @@
 
 // Application headers
 #include "../jersey/generic_design_server.h"
+#include "../jersey/jersey_image_server.h"
 #include "../jersey/team_design_server.h"
 
 // Qt headers
@@ -18,9 +19,10 @@ public:
                    const QString &output_file_path,
                    const QString &generic_jersey_design_file_path,
                    const QString &team_jersey_design_file_path);
+    ~BatchGenerator();
 
     // Image generation
-    bool generate() const;
+    bool generate();
 
 private:
     // File/folder paths
@@ -29,6 +31,8 @@ private:
 
     // Jersey designs
     GenericDesignServer generic_jersey_designs_;
+    bool use_preset_images_{true};
+    JerseyImageServer *preset_jersey_images_{nullptr};
     TeamDesignServer team_jersey_designs_;
 
     // Progress dialog

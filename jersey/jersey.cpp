@@ -180,10 +180,11 @@ void Jersey::selectRandomLayersByClubName(const Text &club_name)
 // --- Set images based on club name --- //
 void Jersey::setImages(const Text &club_name,
                        const GenericDesignServer &generic_jersey_designs,
-                       const TeamDesignServer &team_jersey_designs)
+                       const TeamDesignServer &team_jersey_designs,
+                       const JerseyImageServer &preset_images)
 {
     // FIRST: Check for a preset
-    preset_image_id_ = JerseyImageServer::presetImages().find(club_name.simpleStringLowerCase());
+    preset_image_id_ = preset_images.find(club_name.simpleStringLowerCase());
     if (use_preset_image_ && preset_image_id_ > JerseyImageServer::NO_RESULT)
         return;
 

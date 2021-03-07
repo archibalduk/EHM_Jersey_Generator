@@ -38,6 +38,7 @@ SOURCES += \
     ui/batch_generator_widget.cpp \
     ui/colour_widget.cpp \
     ui/preview_widget.cpp \
+    ui/registry_settings_widget_server.cpp \
     ui/settings_widget.cpp
 
 HEADERS += \
@@ -56,6 +57,7 @@ HEADERS += \
     ui/batch_generator_widget.h \
     ui/colour_widget.h \
     ui/preview_widget.h \
+    ui/registry_settings_widget_server.h \
     ui/settings_widget.h
 
 # Default rules for deployment.
