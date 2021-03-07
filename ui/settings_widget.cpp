@@ -90,6 +90,17 @@ QGroupBox *SettingsWidget::createTextSettingsGroup(const QString &settings_group
     layout->addRow(tr("Adjust vertical position:"), vertical_position_offset_);
     layout->addRow(tr("Adjust text size:"), text_size_offset_);
 
+    // Jersey text-specific settings
+    if (registry_settings_name_prefix.compare("name", Qt::CaseInsensitive) == 0) {
+        auto text_character_limit_{
+            createSpinBox(QString("%1_text_character_limit").arg(registry_settings_name_prefix),
+                          group,
+                          MINIMUM_TEXT_CHARACTER_LIMIT,
+                          MAXIMUM_TEXT_CHARACTER_LIMIT,
+                          Jersey::DEFAULT_JERSEY_TEXT_CHARACTER_LIMIT)};
+        layout->addRow(tr("Character limit before resize:"), text_character_limit_);
+    }
+
     return group;
 }
 

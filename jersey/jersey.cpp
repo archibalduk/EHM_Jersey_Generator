@@ -44,7 +44,7 @@ Jersey::~Jersey()
 bool Jersey::save(const QString &file_name) const
 {
     QSettings settings;
-    const auto image_quality{settings.value("image_quality", -1).toInt()};
+    const auto image_quality{settings.value("image_quality", 0).toInt()};
     return image_->save(file_name, "png", image_quality);
 }
 
@@ -58,6 +58,7 @@ void Jersey::generate()
     // Paint/collate the jersey
     QPainter jersey_painter(image_);
     jersey_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    jersey_painter.setClipping(false);
     jersey_painter.setPen(pen());
 
     // Paint the layers or preset (as applicable)
@@ -70,14 +71,13 @@ void Jersey::generate()
 
     // Paint the jersey name text
     auto name_layer{generateNameLayer()};
-    jersey_painter.drawImage(0 + settings.value("name_text_horizontal_offset", 0).toInt(),
+    const auto name_layer_horizonal_position{(image_->width() - name_layer.width()) / 2};
+
+    jersey_painter.drawImage(name_layer_horizonal_position
+                                 + settings.value("name_text_horizontal_offset", 0).toInt(),
                              Dimensions::JerseyNameVerticalPosition
                                  + settings.value("name_text_vertical_offset", 0).toInt(),
-                             name_layer.scaledToHeight(Dimensions::JerseyNameFontSize
-                                                           + settings
-                                                                 .value("name_text_size_offset", 0)
-                                                                 .toInt(),
-                                                       Qt::SmoothTransformation));
+                             name_layer);
 
     // Paint the jersey number text
     font.setPointSize(Dimensions::JerseyNumberFontSize
@@ -205,7 +205,7 @@ QImage Jersey::generateJerseyLayer(const QString &file_name, QColor colour)
 
     return image;
 }
-
+#include <QDebug>
 // --- Generate the name layer of the image --- //
 QImage Jersey::generateNameLayer() const
 {
@@ -214,18 +214,28 @@ QImage Jersey::generateNameLayer() const
      * resulting better quality text.
      */
 
-    // Font
-    FontServer font_server;
-    auto font{font_server.font()};
-    font.setPointSize(Dimensions::JerseyNameUpscaledFontSize);
-
     // Name text
-    QSettings settings;
+    QSettings settings;    
     QString name_text{(settings.value("upper_case_name_text", true).toBool()) ? surname_.toUpper()
                                                                               : surname_};
 
     if (!settings.value("accented_characters", false).toBool()) // Strip accented characters
         Text::toSimpleString(name_text);
+
+    // Character limit
+    const auto character_limit{
+        settings.value("name_text_character_limit", DEFAULT_JERSEY_TEXT_CHARACTER_LIMIT).toInt()};
+
+    auto font_size_ratio{static_cast<qreal>(character_limit) / static_cast<qreal>(name_text.size())};
+    if (font_size_ratio > 1)
+        font_size_ratio = 1;
+    else if (font_size_ratio < DEFAULT_MINIMUM_FONT_SIZE_RATIO)
+        font_size_ratio = DEFAULT_MINIMUM_FONT_SIZE_RATIO;
+
+    // Font
+    FontServer font_server;
+    auto font{font_server.font()};
+    font.setPointSize(Dimensions::JerseyNameUpscaledFontSize * font_size_ratio);
 
     // Name layer image
     QImage name_layer(Dimensions::JerseyNameUpscaledWidth,
@@ -236,17 +246,29 @@ QImage Jersey::generateNameLayer() const
     // Name layer painter
     QPainter painter(&name_layer);
     painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    painter.setClipping(false);
     painter.setPen(pen());
     painter.setFont(font);
-    painter.drawText(0,
-                     0,
-                     Dimensions::JerseyNameUpscaledWidth,
-                     Dimensions::JerseyNameUpscaledHeight,
-                     Qt::AlignCenter,
-                     name_text);
+
+    // Name bounding rectangle
+    auto name_bounds{painter.boundingRect(0,
+                                          0,
+                                          Dimensions::JerseyNameUpscaledWidth,
+                                          Dimensions::JerseyNameUpscaledHeight,
+                                          Qt::AlignCenter,
+                                          name_text)};
+    name_bounds.setWidth(Dimensions::JerseyNameUpscaledWidth);
+    const QPoint centre(Dimensions::JerseyNameUpscaledWidth / 2,
+                        Dimensions::JerseyNameUpscaledHeight / 2);
+    name_bounds.moveCenter(centre);
+
+    // Draw the text
+    painter.drawText(name_bounds, Qt::AlignCenter, name_text);
     painter.end();
 
-    return name_layer;
+    return name_layer.scaledToHeight(Dimensions::JerseyNameFontSize
+                                         + settings.value("name_text_size_offset", 0).toInt(),
+                                     Qt::SmoothTransformation);
 }
 
 // --- Paint/generate the jersey using layer images --- //

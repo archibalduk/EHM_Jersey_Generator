@@ -63,6 +63,7 @@ public:
     enum ENUM_FLAGS {
         MINIMUM_JERSEY_NUMBER = 1,
         MAXIMUM_JERSEY_NUMBER = 99,
+        DEFAULT_JERSEY_TEXT_CHARACTER_LIMIT = 14,
         DEFAULT_TRIM_COLOUR_THRESHOLD = 60,
         SAFE_TRIM_COLOUR_GAP = 70
     };
@@ -103,6 +104,9 @@ private:
     // Player details
     qint16 jersey_number_;
     QString surname_;
+
+    // Text font size ratio
+    static constexpr qreal DEFAULT_MINIMUM_FONT_SIZE_RATIO{0.63};
 };
 
 #endif // JERSEY_H

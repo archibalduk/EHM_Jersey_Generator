@@ -39,6 +39,8 @@ private:
                             const qint32 default_value = 0);
 
     enum ENUM_RANGES {
+        MINIMUM_TEXT_CHARACTER_LIMIT = 0,
+        MAXIMUM_TEXT_CHARACTER_LIMIT = 50,
         MINIMUM_HORIZONTAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageWidth,
         MAXIMUM_HORIZONTAL_POSITION_OFFSET = Dimensions::JerseyImageWidth,
         MINIMUM_IMAGE_QUALITY = -1,

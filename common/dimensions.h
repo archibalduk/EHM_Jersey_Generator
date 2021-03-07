@@ -18,7 +18,8 @@ enum ENUM_JERSEY_DIMENSIONS {
     JerseyNumberFontSize = 80,
     JerseyNumberVerticalPosition = 74,
     // Upscaled jersey name text
-    JerseyNameUpscaleMultiplier = 5,
+    JerseyNameAvailableNameTextWidth = JerseyImageWidth - (JerseyImageVerticalPadding * 3),
+    JerseyNameUpscaleMultiplier = 4,
     JerseyNameUpscaledFontSize = JerseyNameFontSize * JerseyNameUpscaleMultiplier,
     JerseyNameUpscaledWidth = JerseyImageWidth * JerseyNameUpscaleMultiplier,
     JerseyNameUpscaledHeight = JerseyNameUpscaledFontSize,
