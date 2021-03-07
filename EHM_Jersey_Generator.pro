@@ -81,6 +81,7 @@ DISTFILES += \
     images/layer_foreground/car-foreground-2020.png \
     images/layer_foreground/cgy-foreground-2020-01.png \
     images/layer_foreground/cgy-foreground-2020-02.png \
+    images/layer_foreground/cgy-foreground-2020.png \
     images/layer_foreground/chi-foreground-2020.png \
     images/layer_foreground/clb-foreground-2020.png \
     images/layer_foreground/col-foreground-2020.png \
@@ -131,9 +132,11 @@ DISTFILES += \
     images/layer_trim/pit-trim-2020.png \
     images/layer_trim/sjs-trim-2020-01.png \
     images/layer_trim/sjs-trim-2020-02.png \
+    images/layer_trim/sjs-trim-2020.png \
     images/layer_trim/stl-trim-2020-01.png \
     images/layer_trim/stl-trim-2020-02.png \
     images/layer_trim/stl-trim-2020-03.png \
+    images/layer_trim/stl-trim-2020.png \
     images/layer_trim/tbl-trim-2020.png \
     images/layer_trim/tor-trim-2020.png \
     images/layer_trim/van-trim-2020.png \
