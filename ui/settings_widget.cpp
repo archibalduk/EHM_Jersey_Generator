@@ -63,7 +63,7 @@ QGroupBox *SettingsWidget::createGeneralSettingsGroup()
     layout->addRow(tr("Allow accented characters:"), accented_characters);
     layout->addRow(tr("Two tone effect:"), two_tone_layer);
     layout->addRow(tr("Upper case text:"), upper_case_name_text);
-    layout->addRow(tr("Image quality:"), image_quality);
+    layout->addRow(tr("Image quality (0-100):"), image_quality);
     layout->addRow(tr("Trim colour threshold:"), trim_colour_threshold);
 
     return group;
@@ -75,38 +75,46 @@ QGroupBox *SettingsWidget::createTextSettingsGroup(const QString &settings_group
 {
     auto group{new QGroupBox(QString("%1 Settings").arg(settings_group_title), this)};
 
-    auto horizontal_position_offset_{
+    auto horizontal_position_offset{
         createSpinBox(QString("%1_text_horizontal_offset").arg(registry_settings_name_prefix),
                       group,
                       MINIMUM_HORIZONTAL_POSITION_OFFSET,
                       MAXIMUM_HORIZONTAL_POSITION_OFFSET)};
 
-    auto vertical_position_offset_{
+    auto vertical_position_offset{
         createSpinBox(QString("%1_text_vertical_offset").arg(registry_settings_name_prefix),
                       group,
                       MINIMUM_VERTICAL_POSITION_OFFSET,
                       MAXIMUM_VERTICAL_POSITION_OFFSET)};
 
-    auto text_size_offset_{
+    auto text_size_offset{
         createSpinBox(QString("%1_text_size_offset").arg(registry_settings_name_prefix),
                       group,
                       MINIMUM_TEXT_SIZE_OFFSET,
                       MAXIMUM_TEXT_SIZE_OFFSET)};
 
     auto layout{new QFormLayout(group)};
-    layout->addRow(tr("Adjust horizontal position:"), horizontal_position_offset_);
-    layout->addRow(tr("Adjust vertical position:"), vertical_position_offset_);
-    layout->addRow(tr("Adjust text size:"), text_size_offset_);
+    layout->addRow(tr("Adjust horizontal position:"), horizontal_position_offset);
+    layout->addRow(tr("Adjust vertical position:"), vertical_position_offset);
+    layout->addRow(tr("Adjust text size:"), text_size_offset);
 
     // Jersey text-specific settings
     if (registry_settings_name_prefix.compare("name", Qt::CaseInsensitive) == 0) {
-        auto text_character_limit_{
+        auto text_upscale_factor{
+            createSpinBox(QString("%1_text_upscale_factor").arg(registry_settings_name_prefix),
+                          group,
+                          MINIMUM_JERSEY_NAME_UPSCALE_MULTIPLIER,
+                          MAXIMUM_JERSEY_NAME_UPSCALE_MULTIPLIER,
+                          Dimensions::DefaultJerseyNameUpscaleMultiplier)};
+        layout->addRow(tr("Text quality (1-10):"), text_upscale_factor);
+
+        auto text_character_limit{
             createSpinBox(QString("%1_text_character_limit").arg(registry_settings_name_prefix),
                           group,
                           MINIMUM_TEXT_CHARACTER_LIMIT,
                           MAXIMUM_TEXT_CHARACTER_LIMIT,
                           Jersey::DEFAULT_JERSEY_TEXT_CHARACTER_LIMIT)};
-        layout->addRow(tr("Character limit before resize:"), text_character_limit_);
+        layout->addRow(tr("Character limit before resize:"), text_character_limit);
     }
 
     return group;

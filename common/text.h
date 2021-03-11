@@ -17,6 +17,9 @@ public:
     QString simpleString() const;
     QString simpleStringLowerCase() const { return simpleString().toLower(); }
     inline QString text() const { return text_string_; }
+    static QString toSafeFilePath(const QString &file_path,
+                                  QString file_name,
+                                  const QString &file_extension);
     static void toSimpleString(QString &text);
 
     // Random seed

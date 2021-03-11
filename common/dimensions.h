@@ -19,19 +19,16 @@ enum ENUM_JERSEY_DIMENSIONS {
     JerseyNumberVerticalPosition = 74,
     // Upscaled jersey name text
     JerseyNameAvailableNameTextWidth = JerseyImageWidth - (JerseyImageVerticalPadding * 3),
-    JerseyNameUpscaleMultiplier = 4,
-    JerseyNameUpscaledFontSize = JerseyNameFontSize * JerseyNameUpscaleMultiplier,
-    JerseyNameUpscaledWidth = JerseyImageWidth * JerseyNameUpscaleMultiplier,
-    JerseyNameUpscaledHeight = JerseyNameUpscaledFontSize,
+    DefaultJerseyNameUpscaleMultiplier = 4
 };
 
 enum ENUM_USER_INTERFACE_DIMENSIONS {
     // Preview label
-    PreviewWidth = 220,
+    PreviewWidth = 250,
     PreviewHeight = JerseyImageHeight,
     // Widget panel
     WidgetPanelCount = 2,
-    WidgetPanelWidth = 300,
+    WidgetPanelWidth = 350,
     // Application window
     WindowPadding = 10,
     WindowWidth = PreviewWidth + (WidgetPanelWidth * WidgetPanelCount)

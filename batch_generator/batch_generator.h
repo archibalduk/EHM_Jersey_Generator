@@ -35,11 +35,6 @@ private:
     JerseyImageServer *preset_jersey_images_{nullptr};
     TeamDesignServer team_jersey_designs_;
 
-    // Progress dialog
-    void updateProgressDialog(QProgressDialog &progress,
-                              const qint32 &total_rows_processed,
-                              QElapsedTimer &timer) const;
-
     enum ENUM_SPREADSHEET_COLUMNS {
         PLAYER_FIRST_NAME = 1,
         PLAYER_SECOND_NAME,

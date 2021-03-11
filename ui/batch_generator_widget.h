@@ -6,6 +6,7 @@
 
 // Qt headers
 class QComboBox;
+class QDoubleSpinBox;
 class QGroupBox;
 class QLineEdit;
 class QPushButton;
@@ -20,18 +21,17 @@ public:
 private:
     // Design selection
     QGroupBox *createDesignSelectionWidget();
+    QCheckBox *use_preset_images_;
+    QCheckBox *use_team_layer_designs_;
 
     // Generic design settings
     QGroupBox *createGenericDesignSettingsWidget();
+    QDoubleSpinBox *average_character_random_seed_;
     QComboBox *generic_design_method_selector_;
 
-    enum ENUM_GENERIC_DESIGN_METHOD_SELECTOR_INDEXES {
-        FIXED_LAYERS,
-        GENERIC_LAYERS_BY_CLUB_NAME,
-        PURE_RANDOM,
-        RANDOM_LAYERS_BY_CLUB_NAME,
-        GENERIC_DESIGN_METHOD_SELECTOR_INDEX_COUNT
-    };
+    // Generic design selection
+    QComboBox *jersey_selector_foreground_;
+    QComboBox *jersey_selector_trim_;
 
     // File paths
     QGroupBox *createFilePathWidget();
@@ -43,10 +43,14 @@ private:
     QLineEdit *team_jersey_design_file_path_;
     QLineEdit *output_folder_path_;
 
+    // Initialisation
+    void init();
+
     enum ENUM_DIMENSIONS { BUTTON_WIDTH = 100 };
 
 private slots:
     void onGenerate() const;
+    void setGenericJerseyDesign(const qint32 index);
 };
 
 #endif // BATCH_GENERATOR_WIDGET_H

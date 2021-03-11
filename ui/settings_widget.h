@@ -27,6 +27,8 @@ private:
                                        const QString &registry_settings_name_prefix);
 
     enum ENUM_RANGES {
+        MINIMUM_JERSEY_NAME_UPSCALE_MULTIPLIER = 1,
+        MAXIMUM_JERSEY_NAME_UPSCALE_MULTIPLIER = 10,
         MINIMUM_TEXT_CHARACTER_LIMIT = 0,
         MAXIMUM_TEXT_CHARACTER_LIMIT = 50,
         MINIMUM_HORIZONTAL_POSITION_OFFSET = 0 - Dimensions::JerseyImageWidth,

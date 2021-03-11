@@ -39,6 +39,17 @@ QString Text::simpleString() const
     return text;
 }
 
+// --- Return a file path, name and extension with any erroneous characters removed --- //
+QString Text::toSafeFilePath(const QString &file_path,
+                             QString file_name,
+                             const QString &file_extension)
+{
+    file_name.remove(QRegularExpression("[<>:\"/\\|?*]"));
+    file_name.squeeze();
+
+    return QString("%1/%2.%3").arg(file_path, file_name, file_extension);
+}
+
 // --- Convert text to a simple string with no accents --- //
 void Text::toSimpleString(QString &text)
 {

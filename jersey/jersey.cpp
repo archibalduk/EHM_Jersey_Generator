@@ -17,6 +17,8 @@
 // --- Static data --- //
 std::default_random_engine Jersey::random_generator_(
     std::chrono::system_clock::now().time_since_epoch().count());
+qint32 Jersey::default_foreground_layer_image_id_{0};
+qint32 Jersey::default_trim_layer_image_id_{0};
 
 /* ================================ */
 /*      Jersey Image Generator      */
@@ -176,12 +178,13 @@ void Jersey::selectRandomLayersByClubName(const Text &club_name)
 /* ================ */
 /*      Images      */
 /* ================ */
-
+#include <QDebug>
 // --- Set images based on club name --- //
 void Jersey::setImages(const Text &club_name,
                        const GenericDesignServer &generic_jersey_designs,
                        const TeamDesignServer &team_jersey_designs,
-                       const JerseyImageServer &preset_images)
+                       const JerseyImageServer &preset_images,
+                       const qint32 generic_design_method)
 {
     // FIRST: Check for a preset
     preset_image_id_ = preset_images.find(club_name.simpleStringLowerCase());
@@ -200,13 +203,23 @@ void Jersey::setImages(const Text &club_name,
     }
 
     // THIRD: Use a random jersey
-    selectGenericLayersByClubName(club_name, generic_jersey_designs);
-
-    // Purely random designs (could result in some weird designs)
-    //selectPureRandomLayers();
-
-    // Random designs based on club name (could result in some weird designs)
-    //selectRandomLayersByClubName(club_name);
+    switch (generic_design_method) {
+    case FIXED_LAYERS:
+        foreground_layer_image_id_ = default_foreground_layer_image_id_;
+        trim_layer_image_id_ = default_trim_layer_image_id_;
+        qInfo() << foreground_layer_image_id_ << trim_layer_image_id_;
+        break;
+    case PURE_RANDOM:
+        selectPureRandomLayers();
+        break;
+    case RANDOM_LAYERS_BY_CLUB_NAME:
+        selectRandomLayersByClubName(club_name);
+        break;
+    case GENERIC_LAYERS_BY_CLUB_NAME:
+    default:
+        selectGenericLayersByClubName(club_name, generic_jersey_designs);
+        break;
+    }
 }
 
 /* ======================= */
@@ -261,14 +274,24 @@ QImage Jersey::generateNameLayer() const
     else if (font_size_ratio < DEFAULT_MINIMUM_FONT_SIZE_RATIO)
         font_size_ratio = DEFAULT_MINIMUM_FONT_SIZE_RATIO;
 
+    // Upscale multiplier values
+    const auto jersey_name_upscale_multiplier{
+        settings.value("name_text_upscale_factor", Dimensions::DefaultJerseyNameUpscaleMultiplier)
+            .toInt()};
+    const auto jersey_name_upscaled_font_size{Dimensions::JerseyNameFontSize
+                                              * jersey_name_upscale_multiplier};
+    const auto jersey_name_upscaled_width{Dimensions::JerseyImageWidth
+                                          * jersey_name_upscale_multiplier};
+    const auto jersey_name_upscaled_height{jersey_name_upscaled_font_size};
+
     // Font
     FontServer font_server;
     auto font{font_server.font()};
-    font.setPointSize(Dimensions::JerseyNameUpscaledFontSize * font_size_ratio);
+    font.setPointSize(jersey_name_upscaled_font_size * font_size_ratio);
 
     // Name layer image
-    QImage name_layer(Dimensions::JerseyNameUpscaledWidth,
-                      Dimensions::JerseyNameUpscaledHeight,
+    QImage name_layer(jersey_name_upscaled_width,
+                      jersey_name_upscaled_height,
                       QImage::Format_ARGB32);
     name_layer.fill(QColor(0, 0, 0, 0)); // Fill the image in order to avoid artefacts
 
@@ -282,13 +305,12 @@ QImage Jersey::generateNameLayer() const
     // Name bounding rectangle
     auto name_bounds{painter.boundingRect(0,
                                           0,
-                                          Dimensions::JerseyNameUpscaledWidth,
-                                          Dimensions::JerseyNameUpscaledHeight,
+                                          jersey_name_upscaled_width,
+                                          jersey_name_upscaled_height,
                                           Qt::AlignCenter,
                                           name_text)};
-    name_bounds.setWidth(Dimensions::JerseyNameUpscaledWidth);
-    const QPoint centre(Dimensions::JerseyNameUpscaledWidth / 2,
-                        Dimensions::JerseyNameUpscaledHeight / 2);
+    name_bounds.setWidth(jersey_name_upscaled_width);
+    const QPoint centre(jersey_name_upscaled_width / 2, jersey_name_upscaled_height / 2);
     name_bounds.moveCenter(centre);
 
     // Draw the text
@@ -354,6 +376,11 @@ void Jersey::paintPresetImage(QPainter &jersey_painter)
                              preset_image.scaledToHeight(Dimensions::JerseyImageHeight
                                                              - Dimensions::JerseyImageVerticalPadding,
                                                          Qt::SmoothTransformation));
+
+    // Update the background colour to reflect a sample of the preset image colour taken at the centre of the image
+    // This can later be used to determine whether the trim is too similar to the preset background
+    background_colour_ = preset_image.pixelColor(preset_image.width() / 2,
+                                                 preset_image.height() / 2);
 }
 
 /* ============= */
@@ -363,7 +390,8 @@ void Jersey::paintPresetImage(QPainter &jersey_painter)
 // --- Pen for use with text generation --- //
 QPen Jersey::pen() const
 {
-    // Validate the colour (trim colours similar to the background will result in the foreground colour being used)
+    // Validate the colour
+    // (trim colours similar to the background will result in the foreground colour being used)
     QSettings settings;
     const auto trim_colour_threshold{
         settings.value("trim_colour_threshold", DEFAULT_TRIM_COLOUR_THRESHOLD).toInt()};
@@ -375,15 +403,17 @@ QPen Jersey::pen() const
     auto bad_count{0};
 
     for (const auto &itr : trim_gap) {
-        if (itr <= trim_colour_threshold) // Bad = channel difference within trim colour threshold
+        // Bad = channel difference within trim colour threshold
+        if (itr <= trim_colour_threshold)
             ++bad_count;
-        else if (itr
-                 >= SAFE_TRIM_COLOUR_GAP) // Good = channel difference is at least the same as the safe colour gap
+        // Good = channel difference is at least the same as the safe colour gap
+        else if (itr >= SAFE_TRIM_COLOUR_GAP)
             --bad_count;
     }
 
-    if (bad_count
-        > 1) // Use the foreground colour if more than one trim colour channel is within the threshold of the background channels
+    // Use the foreground colour if more than one trim colour channel is within the threshold of
+    // the background channels
+    if (bad_count > 1)
         colour = &foreground_colour_;
 
     // Set the pen

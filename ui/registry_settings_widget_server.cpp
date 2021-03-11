@@ -2,6 +2,7 @@
 
 // Qt headers
 #include <QCheckBox>
+#include <QDoubleSpinBox>
 #include <QObject>
 #include <QSettings>
 #include <QSpinBox>
@@ -22,6 +23,13 @@ void RegistrySettingsWidgetServer::setBoolSetting(const bool b)
 {
     QSettings settings;
     settings.setValue(QObject::sender()->objectName(), b);
+}
+
+// --- Set a setting (double) --- //
+void RegistrySettingsWidgetServer::setDoubleSetting(const qreal i)
+{
+    QSettings settings;
+    settings.setValue(QObject::sender()->objectName(), i);
 }
 
 // --- Set a setting (integer) --- //
@@ -50,6 +58,29 @@ QCheckBox *RegistrySettingsWidgetServer::createCheckBox(const QString &registry_
                      &RegistrySettingsWidgetServer::setBoolSetting);
 
     return check_box;
+}
+
+// --- Create a double spinbox --- //
+QDoubleSpinBox *RegistrySettingsWidgetServer::createDoubleSpinBox(
+    const QString &registry_settings_name,
+    QWidget *parent,
+    const qreal minimum_value,
+    const qreal maximum_value,
+    const qreal default_value)
+{
+    auto spin_box{new QDoubleSpinBox(parent)};
+    spin_box->setObjectName(registry_settings_name);
+    spin_box->setDecimals(DECIMAL_PRECISION);
+    spin_box->setSingleStep(0.01);
+    spin_box->setRange(minimum_value, maximum_value);
+    QSettings settings;
+    spin_box->setValue(settings.value(spin_box->objectName(), default_value).toDouble());
+    QObject::connect(spin_box,
+                     &QDoubleSpinBox::valueChanged,
+                     this,
+                     &RegistrySettingsWidgetServer::setDoubleSetting);
+
+    return spin_box;
 }
 
 // --- Create a spinbox --- //

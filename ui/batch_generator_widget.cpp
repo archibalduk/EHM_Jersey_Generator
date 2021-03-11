@@ -3,6 +3,7 @@
 // Application headers
 #include "../batch_generator/batch_generator.h"
 #include "../common/text.h"
+#include "../jersey/jersey.h"
 
 // Qt headers
 #include <QCheckBox>
@@ -36,7 +37,10 @@ BatchGeneratorWidget::BatchGeneratorWidget(QWidget *parent) : RegistrySettingsWi
                      &QPushButton::clicked,
                      this,
                      &BatchGeneratorWidget::onGenerate);
-    layout->addWidget(generate_button);
+    layout->addWidget(generate_button, 2, 0, 1, 2);
+
+    // Initialise with default settings
+    init();
 }
 
 // --- Destructor --- //
@@ -47,6 +51,8 @@ BatchGeneratorWidget::~BatchGeneratorWidget()
     settings.setValue(generic_jersey_design_file_path_->objectName(),
                       generic_jersey_design_file_path_->text());
     settings.setValue(output_folder_path_->objectName(), output_folder_path_->text());
+    settings.setValue(generic_design_method_selector_->objectName(),
+                      generic_design_method_selector_->currentIndex());
 }
 
 /* ================================== */
@@ -58,20 +64,12 @@ QGroupBox *BatchGeneratorWidget::createDesignSelectionWidget()
 {
     auto group{new QGroupBox(tr("Jersey Design Settings"), this)};
 
-    auto use_preset_images{createCheckBox("use_preset_images", group, true)};
-    auto use_team_layer_designs{createCheckBox("use_team_layer_designs", group, true)};
-    generic_design_method_selector_ = new QComboBox(this);
-    generic_design_method_selector_->insertItem(FIXED_LAYERS, tr("Use a single design"));
-    generic_design_method_selector_->insertItem(GENERIC_LAYERS_BY_CLUB_NAME,
-                                                tr("Use generic_jerseys.xlsx by team"));
-    generic_design_method_selector_->insertItem(PURE_RANDOM, tr("Use random designs by player"));
-    generic_design_method_selector_->insertItem(RANDOM_LAYERS_BY_CLUB_NAME,
-                                                tr("Use random designs by team"));
+    use_preset_images_ = createCheckBox("use_preset_images", group, true);
+    use_team_layer_designs_ = createCheckBox("use_team_layer_designs", group, true);
 
     auto layout{new QFormLayout(group)};
-    layout->addRow(tr("Use preset jersey images:"), use_preset_images);
-    layout->addRow(tr("Use team layer designs:"), use_team_layer_designs);
-    layout->addRow(tr("Generic design method:"), generic_design_method_selector_);
+    layout->addRow(tr("Use preset jersey images:"), use_preset_images_);
+    layout->addRow(tr("Use team layer designs:"), use_team_layer_designs_);
 
     return group;
 }
@@ -179,8 +177,8 @@ QGroupBox *BatchGeneratorWidget::createFilePathWidget()
     });
 
     auto layout{new QFormLayout(group)};
-    layout->addRow(tr("Generic jersey designs:"), generic_jersey_design_file_path_widget);
-    layout->addRow(tr("Team jersey designs:"), team_jersey_design_file_path_widget);
+    layout->addRow(tr("Generic jersey layer designs:"), generic_jersey_design_file_path_widget);
+    layout->addRow(tr("Team jersey layer designs:"), team_jersey_design_file_path_widget);
     layout->addRow(tr("Input file:"), input_file_path_widget);
     layout->addRow(tr("Output folder:"), output_folder_path_widget);
 
@@ -220,6 +218,10 @@ void BatchGeneratorWidget::onGenerate() const
                              output_folder_path_->text(),
                              generic_jersey_design_file_path_->text(),
                              team_jersey_design_file_path_->text());
+
+    Jersey::setDefaultImages(jersey_selector_foreground_->currentIndex(),
+                             jersey_selector_trim_->currentIndex());
+
     generator.generate();
 }
 
@@ -232,13 +234,77 @@ QGroupBox *BatchGeneratorWidget::createGenericDesignSettingsWidget()
 {
     auto group{new QGroupBox(tr("Generic Design Settings"), this)};
 
-    auto average_character_random_seed{createSpinBox("average_character_random_seed",
-                                                     group,
-                                                     Text::MINIMUM_RANDOM_SEED,
-                                                     Text::MAXIMUM_RANDOM_SEED)};
+    generic_design_method_selector_ = new QComboBox(this);
+    generic_design_method_selector_->setObjectName("generic_design_method");
+    generic_design_method_selector_->insertItem(Jersey::FIXED_LAYERS, tr("Use a single design"));
+    generic_design_method_selector_->insertItem(Jersey::GENERIC_LAYERS_BY_CLUB_NAME,
+                                                tr("Use generic_jerseys.xlsx by team"));
+    generic_design_method_selector_->insertItem(Jersey::PURE_RANDOM,
+                                                tr("Use random designs by player"));
+    generic_design_method_selector_->insertItem(Jersey::RANDOM_LAYERS_BY_CLUB_NAME,
+                                                tr("Use random designs by team"));
+    QObject::connect(generic_design_method_selector_,
+                     &QComboBox::currentIndexChanged,
+                     this,
+                     &BatchGeneratorWidget::setGenericJerseyDesign);
+
+    average_character_random_seed_ = {createDoubleSpinBox("average_character_random_seed",
+                                                          group,
+                                                          Text::MINIMUM_RANDOM_SEED,
+                                                          Text::MAXIMUM_RANDOM_SEED)};
+
+    jersey_selector_foreground_ = new QComboBox(group);
+    JerseyImageServer::foregroundLayers().setComboBox(jersey_selector_foreground_);
+
+    jersey_selector_trim_ = new QComboBox(group);
+    JerseyImageServer::trimLayers().setComboBox(jersey_selector_trim_);
 
     auto layout{new QFormLayout(group)};
-    layout->addRow(tr("Random seed:"), average_character_random_seed);
+    layout->addRow(tr("Generic design method:"), generic_design_method_selector_);
+    layout->addRow(tr("Random seed:"), average_character_random_seed_);
+    layout->addRow(tr("Foreground layer:"), jersey_selector_foreground_);
+    layout->addRow(tr("Trim layer:"), jersey_selector_trim_);
 
     return group;
+}
+
+// --- Set the generic jersey design settings --- //
+void BatchGeneratorWidget::setGenericJerseyDesign(const qint32 index)
+{
+    // Save the setting
+    QSettings settings;
+    settings.setValue(generic_design_method_selector_->objectName(),
+                      generic_design_method_selector_->currentIndex());
+
+    // Update the widgets
+    average_character_random_seed_->setEnabled(index == Jersey::GENERIC_LAYERS_BY_CLUB_NAME
+                                               || index == Jersey::RANDOM_LAYERS_BY_CLUB_NAME);
+    generic_jersey_design_file_path_->setEnabled(index == Jersey::GENERIC_LAYERS_BY_CLUB_NAME);
+    jersey_selector_foreground_->setEnabled(index == Jersey::FIXED_LAYERS);
+    jersey_selector_trim_->setEnabled(index == Jersey::FIXED_LAYERS);
+}
+
+/* ======================== */
+/*      Initialisation      */
+/* ======================== */
+
+// --- Initialise the connections/settings --- //
+void BatchGeneratorWidget::init()
+{
+    QSettings settings;
+
+    // Generic design method
+    generic_design_method_selector_->setCurrentIndex(
+        settings
+            .value(generic_design_method_selector_->objectName(),
+                   Jersey::GENERIC_LAYERS_BY_CLUB_NAME)
+            .toInt());
+    setGenericJerseyDesign(generic_design_method_selector_->currentIndex());
+
+    // Design selection
+    QObject::connect(use_team_layer_designs_,
+                     &QCheckBox::toggled,
+                     team_jersey_design_file_path_,
+                     &QLineEdit::setEnabled);
+    team_jersey_design_file_path_->setEnabled(use_team_layer_designs_->isChecked());
 }

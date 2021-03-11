@@ -20,6 +20,23 @@ class QImage;
 class Jersey
 {
 public:
+    enum ENUM_FLAGS {
+        MINIMUM_JERSEY_NUMBER = 1,
+        MAXIMUM_JERSEY_NUMBER = 99,
+        DEFAULT_JERSEY_TEXT_CHARACTER_LIMIT = 14,
+        DEFAULT_JERSEY_TEXT_UPSCALE_FACTOR = 14,
+        DEFAULT_TRIM_COLOUR_THRESHOLD = 60,
+        SAFE_TRIM_COLOUR_GAP = 70
+    };
+
+    enum ENUM_GENERIC_DESIGN_METHOD_INDEXES {
+        FIXED_LAYERS,
+        GENERIC_LAYERS_BY_CLUB_NAME,
+        PURE_RANDOM,
+        RANDOM_LAYERS_BY_CLUB_NAME,
+        GENERIC_DESIGN_METHOD_SELECTOR_INDEX_COUNT
+    };
+
     // Constructor
     Jersey(const QString &surname = "Smith", const qint32 jersey_number = 99);
     ~Jersey();
@@ -46,11 +63,18 @@ public:
         foreground_colour_ = foreground;
         trim_colour_ = trim;
     }
+    inline static void setDefaultImages(const qint32 foreground_layer_image,
+                                        const qint32 trim_layer_image)
+    {
+        default_foreground_layer_image_id_ = foreground_layer_image;
+        default_trim_layer_image_id_ = trim_layer_image;
+    }
     inline void setJerseyNumber(const qint16 jersey_number) { jersey_number_ = jersey_number; }
     void setImages(const Text &club_name,
                    const GenericDesignServer &generic_jersey_designs,
                    const TeamDesignServer &team_jersey_designs,
-                   const JerseyImageServer &preset_images);
+                   const JerseyImageServer &preset_images,
+                   const qint32 generic_design_method = GENERIC_LAYERS_BY_CLUB_NAME);
     inline void setImages(const qint32 foreground_layer_image,
                           const qint32 trim_layer_image,
                           const qint32 preset_image)
@@ -61,14 +85,6 @@ public:
     }
     inline void setSurname(const QString &surname) { surname_ = surname; }
     inline void usePresetImage(const bool b) { use_preset_image_ = b; }
-
-    enum ENUM_FLAGS {
-        MINIMUM_JERSEY_NUMBER = 1,
-        MAXIMUM_JERSEY_NUMBER = 99,
-        DEFAULT_JERSEY_TEXT_CHARACTER_LIMIT = 14,
-        DEFAULT_TRIM_COLOUR_THRESHOLD = 60,
-        SAFE_TRIM_COLOUR_GAP = 70
-    };
 
 private:
     // Colours
@@ -89,6 +105,10 @@ private:
     QImage generateNameLayer() const;
     void paintLayeredImage(QPainter &jersey_painter);
     void paintPresetImage(QPainter &jersey_painter);
+
+    // Default layer image designs
+    static qint32 default_foreground_layer_image_id_;
+    static qint32 default_trim_layer_image_id_;
 
     // Layer image designs
     qint32 background_layer_image_id_{0};

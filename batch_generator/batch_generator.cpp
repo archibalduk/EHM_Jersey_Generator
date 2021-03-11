@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QSettings>
+#include <QStringList>
 #include <QtConcurrent>
 
 /* ========================= */
@@ -110,10 +111,18 @@ bool BatchGenerator::generate()
     for (qint32 i = first_row; i < final_row; ++i)
         buffer.push_back(i);
 
+    // Error tracker
+    QStringList error_list;
+
+    // Settings
+    QSettings settings;
+    const auto generic_design_method{settings.value("generic_design_method").toInt()};
+
     // Jersey generation lambda
     std::function<bool(int &)> generate =
-        [this, &spreadsheet, &progress, &futureWatcher](const int &i) {
+        [this, &spreadsheet, &error_list, &generic_design_method](const int &i) {
             const auto player_surname{spreadsheet.read(i, PLAYER_SECOND_NAME).toString().trimmed()};
+
             if (player_surname.isEmpty())
                 return true;
 
@@ -125,27 +134,23 @@ bool BatchGenerator::generate()
             jersey.setImages(Text(spreadsheet.read(i, CLUB_NAME).toString()),
                              generic_jersey_designs_,
                              team_jersey_designs_,
-                             *preset_jersey_images_);
+                             *preset_jersey_images_,
+                             generic_design_method);
             jersey.generate();
 
-            const auto output_file_path{
-                QString("%1/%2_%3_%4.png")
-                    .arg(output_folder_path_,
-                         spreadsheet.read(i, PLAYER_FIRST_NAME).toString().trimmed(),
+            //const Text safe_file_name
+
+            const auto output_file_path{Text::toSafeFilePath(
+                output_folder_path_,
+                QString("%1_%2_%3")
+                    .arg(spreadsheet.read(i, PLAYER_FIRST_NAME).toString().trimmed(),
                          player_surname,
-                         spreadsheet.read(i, PLAYER_DATE_OF_BIRTH)
-                             .toString()
-                             .replace(".", "_")
-                             .replace("/", "_"))};
+                         spreadsheet.read(i, PLAYER_DATE_OF_BIRTH).toString()),
+                "png")};
             const auto result{jersey.save(output_file_path)};
 
             if (!result) {
-                futureWatcher.cancel();
-                progress.cancel();
-                QMessageBox::critical(nullptr,
-                                      QObject::tr("File write error (row %L1").arg(i),
-                                      QObject::tr("Unable to save %1 to the disk.")
-                                          .arg(output_file_path));
+                error_list << output_file_path;
                 return false;
             }
 
@@ -172,7 +177,13 @@ bool BatchGenerator::generate()
 
     return true;
 }
+/*
 
+// Progress dialog
+void updateProgressDialog(QProgressDialog &progress,
+                          const qint32 &total_rows_processed,
+                          QElapsedTimer &timer) const; 
+  
 // --- Increment the progress dialog
 void BatchGenerator::updateProgressDialog(QProgressDialog &progress,
                                           const qint32 &total_rows_processed,
@@ -190,7 +201,7 @@ void BatchGenerator::updateProgressDialog(QProgressDialog &progress,
                               .arg(static_cast<qint32>(remaining)));
     progress.setValue(total_rows_processed);
     QApplication::processEvents();
-}
+}*/
 
 /* OLD ITERATION CODE BELOW */
 /*
