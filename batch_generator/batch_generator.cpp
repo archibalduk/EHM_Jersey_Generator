@@ -145,7 +145,7 @@ bool BatchGenerator::generate()
                 QString("%1_%2_%3")
                     .arg(spreadsheet.read(i, PLAYER_FIRST_NAME).toString().trimmed(),
                          player_surname,
-                         spreadsheet.read(i, PLAYER_DATE_OF_BIRTH).toString()),
+                         spreadsheet.read(i, PLAYER_DATE_OF_BIRTH).toString().replace(".", "_")),
                 "png")};
             const auto result{jersey.save(output_file_path)};
 
